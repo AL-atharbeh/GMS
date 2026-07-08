@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/.c49b8dea24b26b08e63135b687234063f63ae8f7-audit.json",
+    "files": [
+        {
+            "date": 1783235255396,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-05-error.log",
+            "hash": "2d94897526485a6a15c0290db7c01acb7d929f3aac090f5b2e95823f601e9536"
+        },
+        {
+            "date": 1783406234957,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-07-error.log",
+            "hash": "e3aeaf7e5f53ad8288573ed7e219dfd1a2472852b4ed0d5528ef04b44f9e60aa"
+        },
+        {
+            "date": 1783499879265,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-08-error.log",
+            "hash": "680f82ff46c1d9e4b68db58e67bd86ba5d5355ad90ed0c100c72402caf0ec2f6"
+        }
+    ],
+    "hashType": "sha256"
+}

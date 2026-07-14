@@ -1,0 +1,10 @@
+{"level":"error","message":"Error in PostgreSQL connection: Error { kind: Closed, cause: None }","target":"quaint::connector::postgres::native","timestamp":"2026-07-14T06:35:20.192Z"}
+{"level":"error","message":"Error in PostgreSQL connection: Error { kind: Closed, cause: None }","target":"quaint::connector::postgres::native","timestamp":"2026-07-14T06:35:20.203Z"}
+{"level":"error","message":"Error in PostgreSQL connection: Error { kind: Closed, cause: None }","target":"quaint::connector::postgres::native","timestamp":"2026-07-14T06:35:20.203Z"}
+{"level":"error","message":"Error in PostgreSQL connection: Error { kind: Closed, cause: None }","target":"quaint::connector::postgres::native","timestamp":"2026-07-14T06:35:20.203Z"}
+{"level":"error","message":"\nInvalid `prisma.user.create()` invocation in\n/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/src/scratch/verify_fixes.ts:27:23\n\n  24 \n  25 try {\n  26   console.log(\"Attempting to insert duplicate user with email 'a@gmail.com' under dummy tenant...\");\n→ 27   await prisma.user.create(\nUnique constraint failed on the fields: (`email`)","target":"user.create","timestamp":"2026-07-14T08:20:18.841Z"}
+{"level":"error","message":"Notification send failed: Request failed with status code 404","timestamp":"2026-07-14 11:36:16"}
+{"level":"error","message":"Notification send failed: Request failed with status code 404","timestamp":"2026-07-14 11:37:10"}
+{"level":"error","message":"Notification send failed: Request failed with status code 404","timestamp":"2026-07-14 11:44:33"}
+{"level":"error","message":"Notification send failed: Request failed with status code 404","timestamp":"2026-07-14 11:46:31"}
+{"level":"error","message":"Notification send failed: Request failed with status code 404","timestamp":"2026-07-14 11:47:20"}

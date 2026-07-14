@@ -35,6 +35,9 @@ import trackingRoutes from './modules/tracking/tracking.routes';
 import equipmentRoutes from './modules/equipment/equipment.routes';
 import insuranceRoutes from './modules/insurance/insurance.routes';
 import suppliersRoutes from './modules/inventory/suppliers.routes';
+import usersRoutes from './modules/users/users.routes';
+import supportRoutes from './modules/tenants/support.routes';
+import { initStatementScheduler } from './modules/customers/statement.scheduler';
 
 const app = express();
 const httpServer = createServer(app);
@@ -127,6 +130,8 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/equipment', equipmentRoutes);
 app.use('/api/insurance', insuranceRoutes);
 app.use('/api/suppliers', suppliersRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/support', supportRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -147,6 +152,7 @@ httpServer.listen(PORT, () => {
   logger.info(`🚀 GMS API Server running on port ${PORT}`);
   logger.info(`📊 Environment: ${env.NODE_ENV}`);
   logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+  initStatementScheduler();
 });
 
 export { io };

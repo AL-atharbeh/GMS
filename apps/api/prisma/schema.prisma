@@ -272,6 +272,7 @@ model Tenant {
   laborRates        LaborRate[]
   invoices          Invoice[]
   notifications     Notification[]
+  inAppNotifications InAppNotification[]
   auditLogs         AuditLog[]
   supportTickets    SupportTicket[]
   whatsappCampaigns WhatsAppCampaign[]
@@ -330,7 +331,7 @@ model User {
   tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branchId        String?
   branch          Branch?     @relation(fields: [branchId], references: [id])
-  email           String
+  email           String      @unique
   passwordHash    String
   name            String
   nameAr          String?
@@ -354,7 +355,6 @@ model User {
   createdWorkOrders WorkOrder[] @relation("CreatedByUser")
   receivedVehicles Vehicle[]   @relation("ReceivedByUser")
 
-  @@unique([tenantId, email])
   @@index([tenantId])
   @@index([role])
   @@map("users")
@@ -792,6 +792,8 @@ model TaskAssignment {
   completedAt     DateTime?
   notes           String?
   reworkCount     Int           @default(0)
+  reworkStatus    String?       @default("NONE") // NONE, PENDING, CONFIRMED, DISMISSED
+  reworkReason    String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -1466,4 +1468,19 @@ model SupportMessage {
 
   @@index([ticketId])
   @@map("support_messages")
+}
+
+model InAppNotification {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  body        String
+  type        String   @default("SYSTEM") // "ANNOUNCEMENT", "SYSTEM", "SUPPORT"
+  sourceType  String   @default("SYSTEM") // "ANNOUNCEMENT", "SYSTEM"
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("in_app_notifications")
 }

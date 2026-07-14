@@ -77,6 +77,10 @@ export class InvoicingService {
     const invoice = await prisma.invoice.findFirst({
       where: { workOrderId, tenantId },
       include: {
+        tenant: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
         workOrder: {
           include: {
             vehicle: true,

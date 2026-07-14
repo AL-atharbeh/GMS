@@ -1,12 +1,13 @@
 import { Router, Response } from 'express';
 import { prisma } from '../../config/database';
-import { authenticate, AuthRequest } from '../../middleware/auth';
+import { authenticate, authorize, AuthRequest } from '../../middleware/auth';
 import { z } from 'zod';
 import { validate } from '../../middleware/validate';
 import { AppError } from '../../middleware/errorHandler';
 
 const router = Router();
 router.use(authenticate);
+router.use(authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'));
 
 // ─── Get All Inventory Parts ────────────────────────────────────────────────
 router.get('/', async (req: AuthRequest, res: Response) => {
@@ -170,6 +171,10 @@ router.patch('/:id/stock', validate(adjustStockSchema), async (req: AuthRequest,
   const { tenantId, branchId, id: userId } = req.user!;
   const partId = req.params.id;
   const { quantity, notes } = req.body;
+
+  if (!branchId) {
+    throw new AppError('Branch ID is required for stock adjustment', 400);
+  }
 
   // Get current inventory record
   const inventory = await prisma.inventory.findFirst({

@@ -54,7 +54,7 @@ const createSchema = z.object({
   }),
 });
 
-router.post('/', validate(createSchema), async (req: AuthRequest, res: Response) => {
+router.post('/', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'), validate(createSchema), async (req: AuthRequest, res: Response) => {
   const workOrder = await workOrderService.createWorkOrder(
     req.user!.tenantId,
     req.user!.id,
@@ -64,13 +64,14 @@ router.post('/', validate(createSchema), async (req: AuthRequest, res: Response)
 });
 
 // ─── Get Work Orders (List) ─────────────────────────────────────────────────
-router.get('/', async (req: AuthRequest, res: Response) => {
+router.get('/', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'), async (req: AuthRequest, res: Response) => {
   const { page, limit, status, branchId, search, dateFrom, dateTo } = req.query;
+  const isBranchScoped = ['BRANCH_MANAGER', 'RECEPTIONIST'].includes(req.user!.role);
   const result = await workOrderService.getWorkOrders(req.user!.tenantId, {
     page: page ? parseInt(page as string) : 1,
     limit: limit ? parseInt(limit as string) : 20,
     status: status as WorkOrderStatus,
-    branchId: branchId as string,
+    branchId: isBranchScoped ? (req.user!.branchId || undefined) : (branchId as string),
     search: search as string,
     dateFrom: dateFrom ? new Date(dateFrom as string) : undefined,
     dateTo: dateTo ? new Date(dateTo as string) : undefined,
@@ -79,9 +80,19 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 });
 
 // ─── Get Single Work Order ──────────────────────────────────────────────────
-router.get('/:id', async (req: AuthRequest, res: Response) => {
+router.get('/:id', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'), async (req: AuthRequest, res: Response) => {
   const workOrder = await workOrderService.getWorkOrder(req.user!.tenantId, req.params.id);
+  const isBranchScoped = ['BRANCH_MANAGER', 'RECEPTIONIST'].includes(req.user!.role);
+  if (isBranchScoped && workOrder.branchId !== req.user!.branchId) {
+    return res.status(404).json({ success: false, message: 'Work order not found' });
+  }
   res.json({ success: true, data: workOrder });
+});
+
+// ─── Get Intake QR Code ──────────────────────────────────────────────────────
+router.get('/:id/qrcode', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'), async (req: AuthRequest, res: Response) => {
+  const qr = await workOrderService.generateQrCode(req.user!.tenantId, req.params.id);
+  res.json({ success: true, data: qr });
 });
 
 // ─── Update Status ──────────────────────────────────────────────────────────
@@ -97,7 +108,7 @@ const updateStatusSchema = z.object({
   }),
 });
 
-router.patch('/:id/status', validate(updateStatusSchema), async (req: AuthRequest, res: Response) => {
+router.patch('/:id/status', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'), validate(updateStatusSchema), async (req: AuthRequest, res: Response) => {
   const workOrder = await workOrderService.updateStatus(
     req.user!.tenantId,
     req.params.id,
@@ -108,7 +119,7 @@ router.patch('/:id/status', validate(updateStatusSchema), async (req: AuthReques
 });
 
 // ─── Photo Upload ───────────────────────────────────────────────────────────
-router.post('/:id/photos', async (req: AuthRequest, res: Response) => {
+router.post('/:id/photos', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST', 'TECHNICIAN'), async (req: AuthRequest, res: Response) => {
   const { photoData, type, caption } = req.body;
   if (!photoData || !photoData.startsWith('data:image/')) {
     return res.status(400).json({ success: false, message: 'Invalid photo format' });
@@ -160,7 +171,7 @@ const addItemsSchema = z.object({
   }),
 });
 
-router.post('/:id/items', validate(addItemsSchema), async (req: AuthRequest, res: Response) => {
+router.post('/:id/items', authorize('GARAGE_OWNER', 'BRANCH_MANAGER'), validate(addItemsSchema), async (req: AuthRequest, res: Response) => {
   const items = await workOrderService.addItems(
     req.user!.tenantId,
     req.params.id,
@@ -179,7 +190,7 @@ const assignTaskSchema = z.object({
   }),
 });
 
-router.post('/:id/tasks', validate(assignTaskSchema), async (req: AuthRequest, res: Response) => {
+router.post('/:id/tasks', authorize('GARAGE_OWNER', 'BRANCH_MANAGER'), validate(assignTaskSchema), async (req: AuthRequest, res: Response) => {
   const assignment = await workOrderService.assignTask(
     req.user!.tenantId,
     req.params.id,

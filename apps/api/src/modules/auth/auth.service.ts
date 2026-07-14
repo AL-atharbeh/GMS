@@ -25,8 +25,10 @@ interface LoginDto {
 export class AuthService {
   // ─── Register a new Garage (Tenant) ─────────────────────────────────────────
   async registerGarage(data: RegisterGarageDto) {
-    const existingUser = await prisma.user.findFirst({
-      where: { email: data.email },
+    const normalizedEmail = data.email.toLowerCase().trim();
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -34,7 +36,7 @@ export class AuthService {
     }
 
     const existingTenant = await prisma.tenant.findUnique({
-      where: { email: data.email },
+      where: { email: normalizedEmail },
     });
 
     if (existingTenant) {
@@ -58,7 +60,7 @@ export class AuthService {
           name: data.garageName,
           nameAr: data.garageNameAr,
           slug,
-          email: data.email,
+          email: normalizedEmail,
           phone: data.phone,
           status: 'TRIAL',
           trialEndsAt,
@@ -97,7 +99,7 @@ export class AuthService {
         data: {
           tenantId: tenant.id,
           branchId: branch.id,
-          email: data.email,
+          email: normalizedEmail,
           passwordHash,
           name: data.ownerName,
           role: 'GARAGE_OWNER',
@@ -133,8 +135,9 @@ export class AuthService {
 
   // ─── Login ────────────────────────────────────────────────────────────────────
   async login(data: LoginDto, ipAddress?: string, userAgent?: string) {
-    const user = await prisma.user.findFirst({
-      where: { email: data.email },
+    const normalizedEmail = data.email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
       include: {
         tenant: true,
         branch: true,
@@ -199,8 +202,9 @@ export class AuthService {
 
   // ─── Super Admin Login ────────────────────────────────────────────────────────
   async superAdminLogin(data: LoginDto) {
+    const normalizedEmail = data.email.toLowerCase().trim();
     const superAdmin = await prisma.superAdmin.findUnique({
-      where: { email: data.email },
+      where: { email: normalizedEmail },
     });
 
     if (!superAdmin || !superAdmin.isActive) {
@@ -225,6 +229,7 @@ export class AuthService {
 
     return {
       superAdmin: { id: superAdmin.id, name: superAdmin.name, email: superAdmin.email },
+      accessToken: token,
       token,
     };
   }
@@ -287,6 +292,90 @@ export class AuthService {
 
     // Invalidate all refresh tokens
     await prisma.refreshToken.deleteMany({ where: { userId } });
+
+    return true;
+  }
+
+  // ─── Impersonate Tenant ──────────────────────────────────────────────────────
+  async impersonate(tenantId: string) {
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      include: {
+        users: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!tenant) {
+      throw new AppError('Tenant not found', 404);
+    }
+
+    // Find the first user who is a GARAGE_OWNER, otherwise any active user
+    let user = tenant.users.find((u) => u.role === 'GARAGE_OWNER');
+    if (!user && tenant.users.length > 0) {
+      user = tenant.users[0];
+    }
+
+    if (!user) {
+      throw new AppError('No active users found for this garage', 400);
+    }
+
+    const tokens = this.generateTokens(user.id, tenant.id, user.role);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);
+
+    // Get the default active branch if any
+    const branch = await prisma.branch.findFirst({
+      where: { tenantId: tenant.id, isActive: true },
+    });
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        nameAr: user.nameAr,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        preferredLanguage: user.preferredLanguage,
+        branchId: user.branchId,
+      },
+      tenant: {
+        id: tenant.id,
+        name: tenant.name,
+        nameAr: tenant.nameAr,
+        slug: tenant.slug,
+        status: tenant.status,
+        trialEndsAt: tenant.trialEndsAt,
+        country: tenant.country,
+        currency: tenant.currency,
+        logo: tenant.logo,
+      },
+      branch: branch ? {
+        id: branch.id,
+        name: branch.name,
+      } : null,
+      tokens,
+    };
+  }
+
+  // ─── Reset Password Without Authentication ────────────────────────────────────
+  async resetPasswordWithoutAuth(email: string, newPassword: string) {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (!user) {
+      throw new AppError('المستخدم غير موجود', 404, 'USER_NOT_FOUND');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    // Invalidate all refresh tokens for security
+    await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
 
     return true;
   }

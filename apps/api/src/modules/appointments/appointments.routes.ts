@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { prisma } from '../../config/database';
-import { authenticate, AuthRequest } from '../../middleware/auth';
+import { authenticate, authorize, AuthRequest } from '../../middleware/auth';
 import { z } from 'zod';
 import { validate } from '../../middleware/validate';
 import { AppError } from '../../middleware/errorHandler';
@@ -8,6 +8,7 @@ import { WorkOrderService } from '../work-orders/workOrder.service';
 
 const router = Router();
 router.use(authenticate);
+router.use(authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'));
 
 const workOrderService = new WorkOrderService();
 

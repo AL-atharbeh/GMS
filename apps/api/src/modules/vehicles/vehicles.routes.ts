@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { prisma } from '../../config/database';
-import { authenticate, AuthRequest } from '../../middleware/auth';
+import { authenticate, authorize, AuthRequest } from '../../middleware/auth';
 import { z } from 'zod';
 import { validate } from '../../middleware/validate';
 import fs from 'fs';
@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 router.use(authenticate);
+router.use(authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'));
 
 // ─── Get All Vehicles ───────────────────────────────────────────────────────
 router.get('/', async (req: AuthRequest, res: Response) => {
@@ -110,6 +111,68 @@ router.post('/', validate(createVehicleSchema), async (req: AuthRequest, res: Re
   });
 
   res.status(201).json({ success: true, data: vehicle });
+});
+
+// ─── Get Vehicle History Report ─────────────────────────────────────────────
+router.get('/:vehicleId/history', async (req: AuthRequest, res: Response) => {
+  const { tenantId } = req.user!;
+  const { vehicleId } = req.params;
+
+  const vehicle = await prisma.vehicle.findFirst({
+    where: { id: vehicleId, tenantId },
+    include: {
+      customerVehicle: {
+        include: {
+          customer: true,
+        },
+      },
+    },
+  });
+
+  if (!vehicle) {
+    return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
+  }
+
+  // Get completed and delivered work orders
+  const workOrders = await prisma.workOrder.findMany({
+    where: {
+      vehicleId,
+      tenantId,
+      status: { in: ['READY_FOR_DELIVERY', 'DELIVERED'] },
+      orderNumber: { not: { startsWith: 'WO-DEP-' } }, // exclude deposit cards
+    },
+    include: {
+      workOrderItems: {
+        include: {
+          part: true,
+          laborRate: true,
+        },
+      },
+      taskAssignments: {
+        include: {
+          technician: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { receivedAt: 'desc' },
+  });
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+  });
+
+  res.json({
+    success: true,
+    data: {
+      tenant,
+      vehicle,
+      workOrders,
+    },
+  });
 });
 
 export default router;

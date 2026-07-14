@@ -6,12 +6,13 @@ import { Router, Response } from 'express';
 const NO_SHOW_WARN_THRESHOLD = 3;
 const NO_SHOW_CRITICAL_THRESHOLD = 5;
 import { prisma } from '../../config/database';
-import { authenticate, AuthRequest } from '../../middleware/auth';
+import { authenticate, authorize, AuthRequest } from '../../middleware/auth';
 import { z } from 'zod';
 import { validate } from '../../middleware/validate';
 
 const router = Router();
 router.use(authenticate);
+router.use(authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'));
 
 // ─── Get All Customers ──────────────────────────────────────────────────────
 router.get('/', async (req: AuthRequest, res: Response) => {
@@ -232,6 +233,121 @@ router.patch('/:id', validate(updateCustomerSchema), async (req: AuthRequest, re
   });
 
   res.json({ success: true, data: updated });
+});
+
+// ─── Get Customer Statement of Account Ledger ───────────────────────────────
+router.get('/:id/statement', async (req: AuthRequest, res: Response) => {
+  const { tenantId } = req.user!;
+  const customerId = req.params.id;
+  const startDateStr = req.query.startDate as string;
+  const endDateStr = req.query.endDate as string;
+
+  const customer = await prisma.customer.findFirst({
+    where: { id: customerId, tenantId },
+  });
+  if (!customer) {
+    return res.status(404).json({ success: false, message: 'العميل غير موجود' });
+  }
+
+  // Default date range: current month to now
+  const startDate = startDateStr ? new Date(startDateStr) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const endDate = endDateStr ? new Date(endDateStr) : new Date();
+
+  // Fetch all invoices of the customer and their successful payments
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      customerId,
+      tenantId,
+      status: { not: 'CANCELLED' },
+    },
+    include: {
+      payments: {
+        where: {
+          status: 'PAID',
+        },
+      },
+    },
+  });
+
+  let invoicedBefore = 0;
+  let paidBefore = 0;
+  const ledger: any[] = [];
+
+  for (const inv of invoices) {
+    const invDate = new Date(inv.createdAt);
+    const invAmount = Number(inv.total);
+
+    if (invDate < startDate) {
+      invoicedBefore += invAmount;
+    } else if (invDate <= endDate) {
+      ledger.push({
+        id: inv.id,
+        date: inv.createdAt,
+        type: 'INVOICE',
+        reference: inv.invoiceNumber,
+        description: 'فاتورة صيانة وإصلاح',
+        amount: invAmount,
+      });
+    }
+
+    for (const pay of inv.payments) {
+      const payDate = new Date(pay.createdAt);
+      const payAmount = Number(pay.amount);
+
+      if (payDate < startDate) {
+        paidBefore += payAmount;
+      } else if (payDate <= endDate) {
+        ledger.push({
+          id: pay.id,
+          date: pay.createdAt,
+          type: 'PAYMENT',
+          reference: pay.reference || 'سند سداد',
+          description: `سند قبض إلكتروني (${pay.method})`,
+          amount: -payAmount,
+        });
+      }
+    }
+  }
+
+  const beginningBalance = invoicedBefore - paidBefore;
+
+  // Sort chronological
+  ledger.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  let runningBalance = beginningBalance;
+  for (const item of ledger) {
+    runningBalance += item.amount;
+    item.rollingBalance = runningBalance;
+  }
+
+  const totalInvoicedDuring = ledger
+    .filter((x) => x.type === 'INVOICE')
+    .reduce((acc, x) => acc + x.amount, 0);
+
+  const totalPaidDuring = ledger
+    .filter((x) => x.type === 'PAYMENT')
+    .reduce((acc, x) => acc + Math.abs(x.amount), 0);
+
+  const endingBalance = beginningBalance + totalInvoicedDuring - totalPaidDuring;
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+  });
+
+  res.json({
+    success: true,
+    data: {
+      customer,
+      tenant,
+      startDate,
+      endDate,
+      beginningBalance,
+      endingBalance,
+      totalInvoicedDuring,
+      totalPaidDuring,
+      ledger,
+    },
+  });
 });
 
 export default router;

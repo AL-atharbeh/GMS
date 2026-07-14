@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { prisma } from '../../config/database';
-import { authenticate, AuthRequest } from '../../middleware/auth';
+import { authenticate, authorize, AuthRequest } from '../../middleware/auth';
 import { AppError } from '../../middleware/errorHandler';
 import { z } from 'zod';
 import { validate } from '../../middleware/validate';
@@ -9,15 +9,22 @@ const router = Router();
 router.use(authenticate);
 
 // ─── Get Reports Dashboard Summary ─────────────────────────────────────────
-router.get('/dashboard', async (req: AuthRequest, res: Response) => {
+// Allowed to BRANCH_MANAGER too — this endpoint backs the general "/dashboard"
+// landing page every non-technician role sees right after login.
+router.get('/dashboard', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'), async (req: AuthRequest, res: Response) => {
   const { tenantId } = req.user!;
   const { branchId, period = '30' } = req.query;
+  const branchIdStr = branchId ? String(branchId) : undefined;
   const days = parseInt(period as string) || 30;
   const dateFrom = new Date();
   dateFrom.setDate(dateFrom.getDate() - days);
 
-  const where: any = { tenantId, createdAt: { gte: dateFrom } };
-  if (branchId) where.branchId = branchId;
+  const where: any = {
+    tenantId,
+    createdAt: { gte: dateFrom },
+    orderNumber: { not: { startsWith: 'WO-DEP-' } },
+  };
+  if (branchIdStr) where.branchId = branchIdStr;
 
   const [
     totalWorkOrders,
@@ -38,7 +45,8 @@ router.get('/dashboard', async (req: AuthRequest, res: Response) => {
     prisma.workOrder.count({
       where: {
         tenantId,
-        ...(branchId && { branchId }),
+        ...(branchIdStr && { branchId: branchIdStr }),
+        orderNumber: { not: { startsWith: 'WO-DEP-' } },
         status: { in: ['RECEIVED', 'DIAGNOSING', 'QUOTED', 'AWAITING_APPROVAL', 'APPROVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY_FOR_DELIVERY'] },
       },
     }),
@@ -55,7 +63,11 @@ router.get('/dashboard', async (req: AuthRequest, res: Response) => {
     // Status breakdown
     prisma.workOrder.groupBy({
       by: ['status'],
-      where: { tenantId, ...(branchId && { branchId }) },
+      where: {
+        tenantId,
+        ...(branchIdStr && { branchId: branchIdStr }),
+        orderNumber: { not: { startsWith: 'WO-DEP-' } },
+      },
       _count: { id: true },
     }),
     // Recent orders
@@ -64,6 +76,7 @@ router.get('/dashboard', async (req: AuthRequest, res: Response) => {
       include: {
         vehicle: { select: { plateNumber: true, make: true, model: true } },
         customer: { select: { name: true } },
+        workOrderItems: { select: { costPrice: true, totalPrice: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -87,6 +100,7 @@ router.get('/dashboard', async (req: AuthRequest, res: Response) => {
         COUNT(id) as orders
       FROM work_orders
       WHERE "tenantId" = ${tenantId}
+        AND "orderNumber" NOT LIKE 'WO-DEP-%'
         AND status = 'DELIVERED'
         AND "createdAt" >= ${dateFrom}
       GROUP BY DATE("createdAt")
@@ -117,7 +131,7 @@ router.get('/dashboard', async (req: AuthRequest, res: Response) => {
       },
       statusBreakdown: statusBreakdown.map((s) => ({
         status: s.status,
-        count: s._count.id,
+        count: (s as any)._count?.id || 0,
       })),
       recentOrders,
       dailyRevenue: (dailyRevenue as any[]).map((r) => ({
@@ -130,7 +144,7 @@ router.get('/dashboard', async (req: AuthRequest, res: Response) => {
 });
 
 // ─── Revenue Report ─────────────────────────────────────────────────────────
-router.get('/revenue', async (req: AuthRequest, res: Response) => {
+router.get('/revenue', authorize('GARAGE_OWNER', 'ACCOUNTANT'), async (req: AuthRequest, res: Response) => {
   const { tenantId } = req.user!;
   const { branchId, groupBy = 'day', dateFrom, dateTo } = req.query;
 
@@ -148,6 +162,7 @@ router.get('/revenue', async (req: AuthRequest, res: Response) => {
     FROM work_orders wo
     WHERE wo.tenant_id = ${tenantId}
       AND wo.status = 'DELIVERED'
+      AND wo."orderNumber" NOT LIKE 'WO-DEP-%'
       AND wo.created_at BETWEEN ${startDate} AND ${endDate}
       ${branchId ? `AND wo.branch_id = '${branchId}'` : ''}
     GROUP BY DATE_TRUNC(${groupBy as string}, wo.created_at)
@@ -158,7 +173,7 @@ router.get('/revenue', async (req: AuthRequest, res: Response) => {
 });
 
 // ─── Technician Performance ─────────────────────────────────────────────────
-router.get('/technicians', async (req: AuthRequest, res: Response) => {
+router.get('/technicians', authorize('GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'), async (req: AuthRequest, res: Response) => {
   const { tenantId } = req.user!;
   const { branchId } = req.query;
 
@@ -170,7 +185,12 @@ router.get('/technicians', async (req: AuthRequest, res: Response) => {
     include: {
       user: { select: { name: true, avatar: true } },
       taskAssignments: {
-        where: { status: 'COMPLETED' },
+        where: {
+          status: 'COMPLETED',
+          workOrder: {
+            orderNumber: { not: { startsWith: 'WO-DEP-' } },
+          },
+        },
         select: { actualHours: true, reworkCount: true, workOrder: { select: { totalAmount: true } } },
       },
     },

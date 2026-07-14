@@ -24,6 +24,31 @@
             "date": 1783498839939,
             "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-08-combined.log",
             "hash": "73644ee4ea1b008843aa46ff5b0e01ac50b745feeb6142470559b88e513195ce"
+        },
+        {
+            "date": 1783588214586,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-09-combined.log",
+            "hash": "0b8191ac0620bcc8e5c82daec95a3711096661468bcf752033a0395bbdbbcfd9"
+        },
+        {
+            "date": 1783799435235,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-11-combined.log",
+            "hash": "77b96074d8350a4c1a54614d4ae9256a657307bb7c1ed78e973a9d64ef9fb7ba"
+        },
+        {
+            "date": 1783804088941,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-12-combined.log",
+            "hash": "d7c028ddc078c0a83656553bfc0969a144b1a386b55b84f135aca96bb3eecb4b"
+        },
+        {
+            "date": 1783924517002,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-13-combined.log",
+            "hash": "d9e7bd8c1fe87b3fa785cd6317a2518997438bf549230153635d49d818631c67"
+        },
+        {
+            "date": 1783977770100,
+            "name": "/Users/ahmadal-atharbeh/project/garage_management_system/apps/api/logs/gms-2026-07-14-combined.log",
+            "hash": "c91bf32a0c0944dada898462b7df9d1a36ad3441ae70d1428fd8ae65fabcd2f3"
         }
     ],
     "hashType": "sha256"

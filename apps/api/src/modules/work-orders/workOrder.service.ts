@@ -5,6 +5,7 @@ import { generateOrderNumber } from '../../utils/generators';
 import { NotificationService } from '../notifications/notification.service';
 import { v4 as uuidv4 } from 'uuid';
 import QRCode from 'qrcode';
+import { env } from '../../config/env';
 
 interface CreateWorkOrderDto {
   vehicleId: string;
@@ -216,7 +217,11 @@ export class WorkOrderService {
           },
         },
         photos: { orderBy: { sortOrder: 'asc' } },
-        qualityChecks: { orderBy: { createdAt: 'desc' }, take: 1 },
+        qualityChecks: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          include: { items: { include: { templateItem: true } } },
+        },
         statusHistory: {
           orderBy: { createdAt: 'desc' },
         },
@@ -228,6 +233,29 @@ export class WorkOrderService {
 
     if (!workOrder) throw new AppError('Work order not found', 404);
     return workOrder;
+  }
+
+  // ─── Generate Intake QR Code (internal, authenticated staff link) ───────────
+  async generateQrCode(tenantId: string, workOrderId: string) {
+    const workOrder = await prisma.workOrder.findFirst({
+      where: { id: workOrderId, tenantId },
+      select: {
+        id: true,
+        orderNumber: true,
+        vehicle: { select: { make: true, model: true, plateNumber: true } },
+      },
+    });
+    if (!workOrder) throw new AppError('Work order not found', 404);
+
+    const internalUrl = `${env.FRONTEND_URL}/work-orders/${workOrder.id}`;
+    const qrDataUrl = await QRCode.toDataURL(internalUrl, { margin: 1, width: 300 });
+
+    return {
+      orderNumber: workOrder.orderNumber,
+      vehicle: workOrder.vehicle,
+      url: internalUrl,
+      qrDataUrl,
+    };
   }
 
   // ─── Update Work Order Status ───────────────────────────────────────────────
@@ -244,7 +272,7 @@ export class WorkOrderService {
 
     if (!workOrder) throw new AppError('Work order not found', 404);
 
-    this.validateStatusTransition(workOrder.status, data.status);
+    await this.validateStatusTransition(workOrder.status, data.status, workOrderId);
 
     const updateData: Prisma.WorkOrderUpdateInput = {
       status: data.status,
@@ -414,6 +442,35 @@ export class WorkOrderService {
     });
     if (!technician) throw new AppError('Technician not found', 404);
 
+    // 3. Check for previous completed work order in the last 14 days for same vehicle and same specialty
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+    const previousAssignment = await prisma.taskAssignment.findFirst({
+      where: {
+        specialty: data.specialty,
+        workOrder: {
+          vehicleId: workOrder.vehicleId,
+          tenantId,
+          status: 'DELIVERED',
+          createdAt: { gte: fourteenDaysAgo },
+        },
+      },
+      include: {
+        workOrder: true,
+        technician: { include: { user: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    let reworkStatus = 'NONE';
+    let reworkReason = null;
+
+    if (previousAssignment) {
+      reworkStatus = 'PENDING';
+      reworkReason = `نفس السيارة ونفس التخصص خلال 14 يوم. تاريخ الصيانة السابقة: ${new Date(previousAssignment.createdAt).toLocaleDateString('ar-KW')} بواسطة الفني ${previousAssignment.technician.user.name}. رقم كرت العمل السابق: ${previousAssignment.workOrder.orderNumber}`;
+    }
+
     const assignment = await prisma.taskAssignment.create({
       data: {
         workOrderId,
@@ -423,6 +480,8 @@ export class WorkOrderService {
         estimatedHours: data.estimatedHours || 1,
         notes: data.notes,
         status: 'PENDING',
+        reworkStatus,
+        reworkReason,
       },
       include: {
         technician: { include: { user: { select: { name: true } } } },
@@ -432,7 +491,7 @@ export class WorkOrderService {
     return assignment;
   }
 
-  private validateStatusTransition(current: WorkOrderStatus, next: WorkOrderStatus) {
+  private async validateStatusTransition(current: WorkOrderStatus, next: WorkOrderStatus, workOrderId: string) {
     const validTransitions: Record<WorkOrderStatus, WorkOrderStatus[]> = {
       RECEIVED: ['DIAGNOSING', 'CANCELLED'],
       DIAGNOSING: ['QUOTED', 'CANCELLED'],
@@ -452,6 +511,65 @@ export class WorkOrderService {
         400,
         'INVALID_STATUS_TRANSITION'
       );
+    }
+
+    if (next === 'DELIVERED') {
+      const completionPhoto = await prisma.workOrderPhoto.findFirst({
+        where: { workOrderId, type: 'COMPLETION' },
+      });
+      if (!completionPhoto) {
+        throw new AppError(
+          'لا يمكن التسليم: يجب رفع صورة بعد الإنجاز',
+          400,
+          'MISSING_COMPLETION_PHOTO'
+        );
+      }
+
+      const qualityCheck = await prisma.qualityCheck.findFirst({
+        where: { workOrderId },
+        orderBy: { createdAt: 'desc' },
+        include: { items: { include: { templateItem: true } } },
+      });
+
+      if (!qualityCheck) {
+        throw new AppError(
+          'لا يمكن التسليم: يجب إكمال فحص الجودة أولاً',
+          400,
+          'MISSING_QUALITY_CHECK'
+        );
+      }
+
+      if (qualityCheck.items.length > 0) {
+        const requiredCount = await prisma.qualityCheckTemplateItem.count({
+          where: { templateId: qualityCheck.items[0].templateItem.templateId, isRequired: true },
+        });
+        const answeredRequiredCount = qualityCheck.items.filter((i) => i.templateItem.isRequired).length;
+        if (answeredRequiredCount < requiredCount) {
+          throw new AppError(
+            'لا يمكن التسليم: يجب إكمال فحص الجودة أولاً',
+            400,
+            'MISSING_QUALITY_CHECK'
+          );
+        }
+      } else if (qualityCheck.isPassed === null) {
+        throw new AppError(
+          'لا يمكن التسليم: يجب إكمال فحص الجودة أولاً',
+          400,
+          'MISSING_QUALITY_CHECK'
+        );
+      }
+
+      const pendingTask = await prisma.taskAssignment.findFirst({
+        where: { workOrderId, status: { in: ['PENDING', 'IN_PROGRESS'] } },
+        include: { technician: { include: { user: { select: { name: true } } } } },
+      });
+      if (pendingTask) {
+        throw new AppError(
+          `لا يمكن التسليم: مهمة الفني ${pendingTask.technician.user.name} لسه غير مكتملة`,
+          400,
+          'PENDING_TASK_ASSIGNMENT'
+        );
+      }
     }
   }
 }

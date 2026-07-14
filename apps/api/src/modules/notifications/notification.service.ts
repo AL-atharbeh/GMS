@@ -16,7 +16,7 @@ export class NotificationService {
   async sendWorkOrderNotification(workOrder: any, type: string) {
     if (!workOrder.customer?.phone) return;
 
-    const message = this.buildMessage(workOrder, type);
+    const message = await this.buildMessage(workOrder, type);
     if (!message) return;
 
     await this.send({
@@ -74,11 +74,30 @@ export class NotificationService {
     });
   }
 
-  private buildMessage(workOrder: any, type: string): string {
+  private async buildMessage(workOrder: any, type: string): Promise<string> {
     const { orderNumber, vehicle, customer, trackingToken } = workOrder;
     const trackingUrl = `${env.FRONTEND_URL}/track/${trackingToken}`;
     const vehicleInfo = `${vehicle?.make} ${vehicle?.model} (${vehicle?.plateNumber})`;
     const customerName = customer?.name || 'العميل';
+
+    // Fetch custom templates from tenant settings
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: workOrder.tenantId },
+    });
+    const settingsObj = (tenant?.settings as any) || {};
+    const templates = settingsObj.notificationTemplates || {};
+    const template = templates[type];
+
+    if (template) {
+      const garageName = tenant?.nameAr || tenant?.name || 'الورشة';
+      return template
+        .replace(/{customerName}/g, customerName)
+        .replace(/{vehicleInfo}/g, vehicleInfo)
+        .replace(/{orderNumber}/g, orderNumber)
+        .replace(/{trackingUrl}/g, trackingUrl)
+        .replace(/{paymentLink}/g, trackingUrl)
+        .replace(/{garageName}/g, garageName);
+    }
 
     const messages: Record<string, string> = {
       WORK_ORDER_RECEIVED: `مرحباً ${customerName} 👋\n\nتم استلام سيارتكم ${vehicleInfo} بنجاح ✅\n\nرقم طلب الخدمة: ${orderNumber}\n\nيمكنكم متابعة حالة السيارة عبر الرابط:\n${trackingUrl}`,

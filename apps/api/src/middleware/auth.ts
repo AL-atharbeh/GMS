@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
   user?: {
     id: string;
     tenantId: string;
-    branchId?: string;
+    branchId?: string | null;
     email: string;
     role: UserRole;
     name: string;
@@ -33,6 +33,10 @@ export const authenticate = async (
       tenantId: string;
       role: UserRole;
     };
+
+    if (!decoded.userId) {
+      throw new AppError('Authentication required', 401, 'INVALID_TOKEN');
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },

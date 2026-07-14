@@ -14,12 +14,12 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV === 'development') {
-  prisma.$on('query', (e) => {
+  (prisma as any).$on('query', (e: any) => {
     logger.debug(`Query: ${e.query} | Params: ${e.params} | Duration: ${e.duration}ms`);
   });
 }
 
-prisma.$on('error', (e) => {
+(prisma as any).$on('error', (e: any) => {
   logger.error('Prisma Error:', e);
 });
 

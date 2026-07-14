@@ -138,4 +138,21 @@ router.post('/change-password', authenticate, async (req: AuthRequest, res: Resp
   res.json({ success: true, message: 'Password changed successfully' });
 });
 
+// ─── Reset Password Without Auth ──────────────────────────────────────────────
+const resetPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    password: z.string().min(8).regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password must contain uppercase, lowercase, and number'
+    ),
+  }),
+});
+
+router.post('/reset-password', validate(resetPasswordSchema), async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  await authService.resetPasswordWithoutAuth(email, password);
+  res.json({ success: true, message: 'Password reset successfully' });
+});
+
 export default router;

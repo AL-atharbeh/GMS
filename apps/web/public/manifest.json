@@ -1,0 +1,21 @@
+{
+  "name": "GMS — واجهة الفني",
+  "short_name": "GMS فني",
+  "description": "واجهة الفني لإدارة مهام الصيانة اليومية",
+  "start_url": "/technician-dashboard",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots": []
+}

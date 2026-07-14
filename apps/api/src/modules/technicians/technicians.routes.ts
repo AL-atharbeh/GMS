@@ -201,10 +201,13 @@ router.get('/tasks/:taskId', authorize('TECHNICIAN'), async (req: AuthRequest, r
           workOrderItems: {
             where: { isApproved: true },
             select: {
-              id: true, type: true, description: true, descriptionAr: true,
+              id: true,
+              type: true,
+              description: true,
+              descriptionAr: true,
               quantity: true,
               part: { select: { id: true, name: true, nameAr: true, unit: true, inventory: { select: { quantity: true } } } },
-              laborRate: { select: { id: true, name: true, nameAr: true, duration: true } },
+              laborRate: { select: { id: true, name: true, nameAr: true, estimatedMinutes: true } },
             },
             orderBy: { sortOrder: 'asc' },
           },

@@ -34,11 +34,12 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-export const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: logFormat,
-  transports: [
-    new winston.transports.Console({ format: consoleFormat }),
+const transports: winston.transport[] = [
+  new winston.transports.Console({ format: consoleFormat })
+];
+
+if (!process.env.VERCEL) {
+  transports.push(
     new DailyRotateFile({
       dirname: logDir,
       filename: 'gms-%DATE%-error.log',
@@ -53,8 +54,14 @@ export const logger = winston.createLogger({
       datePattern: 'YYYY-MM-DD',
       maxFiles: '14d',
       maxSize: '20m',
-    }),
-  ],
+    })
+  );
+}
+
+export const logger = winston.createLogger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: logFormat,
+  transports,
 });
 
 export default logger;

@@ -14,7 +14,8 @@
     "db:generate": "prisma generate",
     "db:reset": "prisma migrate reset --force",
     "test": "jest",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.10.2",

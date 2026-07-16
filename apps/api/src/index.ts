@@ -68,6 +68,7 @@ app.use(helmet({
 app.use(cors({
   origin: [
     env.FRONTEND_URL,
+    'https://gms-api-woad.vercel.app',
     'http://localhost:3000',
     'http://localhost:3002',
     'http://localhost:3003',

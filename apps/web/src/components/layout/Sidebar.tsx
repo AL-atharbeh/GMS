@@ -192,7 +192,7 @@ export default function Sidebar() {
   const navRef = useRef<HTMLDivElement>(null)
   const [collapsed, setCollapsed] = useState(false)
 
-  // Scroll preservation and active item auto-scrolling
+  // Scroll preservation and active item auto-scrolling without shifting the page layout
   useEffect(() => {
     const nav = navRef.current
     if (!nav) return
@@ -202,10 +202,15 @@ export default function Sidebar() {
     if (savedScroll) {
       nav.scrollTop = parseInt(savedScroll, 10)
     } else {
-      // Fallback: auto scroll active item into view
-      const activeItem = nav.querySelector('.sidebar-nav-item.active')
+      // Fallback: auto scroll active item into view without scrolling the entire window
+      const activeItem = nav.querySelector('.sidebar-nav-item.active') as HTMLElement
       if (activeItem) {
-        activeItem.scrollIntoView({ block: 'nearest' })
+        const containerHeight = nav.clientHeight
+        const itemTop = activeItem.offsetTop
+        const itemHeight = activeItem.clientHeight
+        if (itemTop < nav.scrollTop || itemTop + itemHeight > nav.scrollTop + containerHeight) {
+          nav.scrollTop = itemTop - containerHeight / 2 + itemHeight / 2
+        }
       }
     }
 

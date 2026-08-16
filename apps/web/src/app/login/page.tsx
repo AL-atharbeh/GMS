@@ -3,11 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/authStore'
-import Link from 'next/link'
+import { useLanguageStore } from '@/lib/stores/languageStore'
+import { useT } from '@/lib/i18n'
+import LanguageToggle from '@/components/layout/LanguageToggle'
 
 export default function LoginPage() {
   const router = useRouter()
   const { login, isLoading } = useAuthStore()
+  const { lang } = useLanguageStore()
+  const t = useT()
+  const dir = lang === 'ar' ? 'rtl' : 'ltr'
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [showPass, setShowPass] = useState(false)
@@ -41,238 +46,270 @@ export default function LoginPage() {
     } catch (err: any) {
       let errMsg = err?.response?.data?.message
       if (errMsg === 'Invalid email or password') {
-        errMsg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+        errMsg = t('login.invalidCreds')
       }
-      setError(errMsg || 'فشل تسجيل الدخول، تحقق من البيانات')
+      setError(errMsg || t('login.genericError'))
     }
   }
 
   return (
     <div
-      className="relative flex items-center justify-center p-4"
+      dir={dir}
       style={{
         height: '100vh',
         width: '100vw',
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #CAF0F8 0%, #90E0EF 45%, #0077B6 100%)',
+        display: 'flex',
         fontFamily: 'var(--font-cairo), sans-serif',
         boxSizing: 'border-box',
+        background: '#f5f7fb',
       }}
     >
-      {/* Background Decorative Art Elements to give frosted glass visibility */}
-      <div 
-        className="absolute w-[500px] h-[500px] rounded-full opacity-35 blur-3xl"
-        style={{
-          top: '-15%',
-          left: '10%',
-          background: 'radial-gradient(circle, #00B4D8, transparent 75%)',
-        }}
-      />
-      <div 
-        className="absolute w-[500px] h-[500px] rounded-full opacity-40 blur-3xl"
-        style={{
-          bottom: '-15%',
-          right: '5%',
-          background: 'radial-gradient(circle, #90E0EF, transparent 75%)',
-        }}
-      />
-
-      {/* Main Glassmorphic Card */}
+      {/* Brand Panel */}
       <div
-        className="w-full relative z-10 flex flex-col justify-between"
         style={{
-          width: '100%',
-          maxWidth: '430px',
-          background: 'rgba(255, 255, 255, 0.45)',
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          borderRadius: '30px',
-          boxShadow: '0 25px 60px -12px rgba(3, 4, 94, 0.14)',
-          padding: '28px 24px',
-          direction: 'rtl',
-          boxSizing: 'border-box',
+          flex: '0 0 44%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '48px 44px',
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(160deg, #03045E 0%, #0077B6 65%, #00B4D8 100%)',
+          color: '#fff',
         }}
+        className="hidden md:flex"
       >
-        {/* Header Branding */}
-        <div className="flex flex-col items-center text-center" style={{ marginBottom: '15px' }}>
+        <div
+          style={{
+            position: 'absolute',
+            width: 420,
+            height: 420,
+            borderRadius: '50%',
+            top: -140,
+            insetInlineEnd: -140,
+            background: 'radial-gradient(circle, rgba(144,224,239,0.35), transparent 70%)',
+            filter: 'blur(10px)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            width: 320,
+            height: 320,
+            borderRadius: '50%',
+            bottom: -100,
+            insetInlineStart: -100,
+            background: 'radial-gradient(circle, rgba(0,180,216,0.3), transparent 70%)',
+            filter: 'blur(10px)',
+          }}
+        />
+
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
             src="/warshatak_logo.png"
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: 16,
-              marginBottom: '10px',
-              objectFit: 'cover',
-            }}
-            alt="Warshatak Logo"
+            style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }}
+            alt="Warshatak"
           />
-          <h2 className="text-xl font-black text-[#03045E]" style={{ margin: '0 0 3px 0' }}>
-            تسجيل الدخول للنظام 🔐
-          </h2>
-          <p className="text-[10px] text-[#0077B6] font-bold" style={{ margin: 0 }}>
-            نظام إدارة الكراج الذكي والسحابي Warshatak
+          <span style={{ fontSize: 20, fontWeight: 900 }}>Warshatak</span>
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.35, margin: '0 0 14px 0' }}>
+            {lang === 'ar' ? 'أدر ورشتك بذكاء، من الاستلام إلى التسليم' : 'Run your workshop smarter — from intake to delivery'}
+          </h1>
+          <p style={{ fontSize: 13.5, opacity: 0.85, lineHeight: 1.8, margin: 0, maxWidth: 380 }}>
+            {lang === 'ar'
+              ? 'منصة سحابية متكاملة لإدارة طلبات الخدمة، الفنيين، المخزون، والفواتير في مكان واحد.'
+              : 'One cloud platform to manage work orders, technicians, inventory, and invoicing.'}
           </p>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div 
-            className="rounded-2xl text-[11px] font-bold flex items-center gap-2 text-red-700"
-            style={{
-              padding: '8px 12px',
-              marginBottom: '12px',
-              background: 'rgba(239, 68, 68, 0.08)',
-              border: '1px solid rgba(239, 68, 68, 0.15)',
-            }}
-          >
-            <span>⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
+        <div style={{ position: 'relative', zIndex: 1, fontSize: 11, opacity: 0.6 }}>
+          © {new Date().getFullYear()} Warshatak
+        </div>
+      </div>
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5" style={{ width: '100%' }}>
-          
-          <div style={{ marginBottom: '12px' }}>
-            <label 
-              className="block text-[11px] font-extrabold text-[#03045E]"
-              style={{ marginBottom: '6px', paddingRight: '6px' }}
-            >
-              البريد الإلكتروني
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="example@garage.com"
-              required
-              style={{
-                width: '100%',
-                fontSize: '12px',
-                fontWeight: '600',
-                padding: '11px 18px',
-                borderRadius: '9999px',
-                border: '1px solid rgba(3, 4, 94, 0.15)',
-                background: 'rgba(255, 255, 255, 0.8)',
-                outline: 'none',
-                color: '#03045E',
-                boxSizing: 'border-box',
-                transition: 'all 0.2s',
-              }}
-              className="focus:bg-white focus:border-[#0077B6] focus:ring-4 focus:ring-[#0077B6]/10"
-              autoComplete="email"
+      {/* Form Panel */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          position: 'relative',
+        }}
+      >
+        <div style={{ position: 'absolute', top: 20, insetInlineEnd: 24 }}>
+          <LanguageToggle />
+        </div>
+
+        <div style={{ width: '100%', maxWidth: 360 }}>
+          <div className="flex md:hidden" style={{ alignItems: 'center', gap: 10, marginBottom: 28 }}>
+            <img
+              src="/warshatak_logo.png"
+              style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }}
+              alt="Warshatak"
             />
+            <span style={{ fontSize: 17, fontWeight: 900, color: '#03045E' }}>Warshatak</span>
           </div>
 
-          <div style={{ marginBottom: '12px' }}>
-            <label 
-              className="block text-[11px] font-extrabold text-[#03045E]"
-              style={{ marginBottom: '6px', paddingRight: '6px' }}
+          <h2 style={{ fontSize: 22, fontWeight: 900, color: '#03045E', margin: '0 0 4px 0' }}>
+            {t('login.title')}
+          </h2>
+          <p style={{ fontSize: 12, color: '#0077B6', fontWeight: 700, margin: '0 0 28px 0' }}>
+            {t('login.subtitle')}
+          </p>
+
+          {error && (
+            <div
+              style={{
+                borderRadius: 14,
+                fontSize: 11.5,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                color: '#b91c1c',
+                padding: '10px 14px',
+                marginBottom: 16,
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.15)',
+              }}
             >
-              كلمة المرور
-            </label>
-            <div className="relative" style={{ width: '100%', position: 'relative' }}>
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+            <div style={{ marginBottom: 16 }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  color: '#03045E',
+                  marginBottom: 6,
+                }}
+              >
+                {t('login.email')}
+              </label>
               <input
-                id="password"
-                type={showPass ? 'text' : 'password'}
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••••"
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="example@garage.com"
                 required
                 style={{
                   width: '100%',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  padding: '11px 18px',
-                  paddingLeft: '45px', // Space for the eye icon inside the input
-                  borderRadius: '9999px',
-                  border: '1px solid rgba(3, 4, 94, 0.15)',
-                  background: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  border: '1.5px solid #e2e8f0',
+                  background: '#f8fafc',
                   outline: 'none',
                   color: '#03045E',
                   boxSizing: 'border-box',
                   transition: 'all 0.2s',
                 }}
-                className="focus:bg-white focus:border-[#0077B6] focus:ring-4 focus:ring-[#0077B6]/10"
-                autoComplete="current-password"
+                autoComplete="email"
               />
-              <button
-                type="button"
-                onClick={() => setShowPass(!showPass)}
+            </div>
+
+            <div style={{ marginBottom: 22 }}>
+              <label
                 style={{
-                  position: 'absolute',
-                  left: '16px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  zIndex: 10,
-                  padding: '4px',
-                  margin: 0,
-                  fontSize: '13px',
+                  display: 'block',
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  color: '#03045E',
+                  marginBottom: 6,
                 }}
               >
-                {showPass ? '👁️' : '🙈'}
-              </button>
+                {t('login.password')}
+              </label>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  id="password"
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="••••••••"
+                  required
+                  style={{
+                    width: '100%',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    padding: '12px 44px 12px 16px',
+                    borderRadius: 12,
+                    border: '1.5px solid #e2e8f0',
+                    background: '#f8fafc',
+                    outline: 'none',
+                    color: '#03045E',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s',
+                  }}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  style={{
+                    position: 'absolute',
+                    insetInlineEnd: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    padding: 4,
+                  }}
+                >
+                  {showPass ? '👁️' : '🙈'}
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Centered / Sakura style Pay Button */}
-          <div className="flex justify-center" style={{ marginTop: '18px', marginBottom: '18px' }}>
             <button
               id="login-btn"
               type="submit"
               disabled={isLoading}
               style={{
-                padding: '10px 32px',
-                borderRadius: '9999px',
-                background: '#03045E',
-                color: '#ffffff',
+                width: '100%',
+                padding: '13px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #03045E, #0077B6)',
+                color: '#fff',
                 border: 'none',
                 outline: 'none',
-                fontWeight: '900',
-                fontSize: '12px',
-                cursor: 'pointer',
+                fontWeight: 800,
+                fontSize: 13.5,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.75 : 1,
+                boxShadow: '0 10px 24px rgba(3, 4, 94, 0.22)',
                 transition: 'all 0.2s',
-                boxShadow: '0 8px 20px rgba(3, 4, 94, 0.2)',
-                alignSelf: 'center',
               }}
-              className="hover:bg-[#0077B6] hover:-translate-y-0.5 active:translate-y-0"
             >
               {isLoading ? (
-                <span className="flex items-center gap-2 justify-center">
-                  <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <svg className="animate-spin" style={{ width: 14, height: 14 }} viewBox="0 0 24 24" fill="none">
+                    <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  جاري التحقق...
+                  {t('login.loading')}
                 </span>
               ) : (
-                'دخول للنظام ←'
+                t('login.submit')
               )}
             </button>
-          </div>
-        </form>
-
-
-
-        {/* Footer Link */}
-        <div className="text-center pt-3 border-t border-white/20" style={{ marginTop: '5px' }}>
-          <span className="text-[11px] text-[#03045E] font-bold">
-            هل أنت كراج جديد؟{' '}
-            <Link
-              href="/register"
-              className="text-[#0077B6] hover:text-[#03045E] transition-colors font-black underline underline-offset-4"
-            >
-              سجل معنا الآن مجاناً
-            </Link>
-          </span>
+          </form>
         </div>
-
       </div>
     </div>
   )

@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/authStore'
+import { useT } from '@/lib/i18n'
+import LanguageToggle from '@/components/layout/LanguageToggle'
 import { useState, useEffect, useRef } from 'react'
 
 // SVG Icons matching the reference image style
@@ -138,50 +140,50 @@ const Icons = {
 
 const NAV_GROUPS = [
   {
-    label: null,
+    label: null, labelKey: null,
     items: [
-      { href: '/dashboard', icon: 'dashboard', label: 'لوحة التحكم', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
-      { href: '/technician-dashboard', icon: 'workOrders', label: 'مهامي اليومية', roles: ['TECHNICIAN'] },
+      { href: '/dashboard', icon: 'dashboard', label: 'لوحة التحكم', labelKey: 'nav.dashboard', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
+      { href: '/technician-dashboard', icon: 'workOrders', label: 'مهامي اليومية', labelKey: 'nav.myTasks', roles: ['TECHNICIAN'] },
     ],
   },
   {
-    label: 'العمليات',
+    label: 'العمليات', labelKey: 'nav.operations',
     items: [
-      { href: '/work-orders', icon: 'workOrders', label: 'طلبات الخدمة', badge: null, roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'] },
-      { href: '/vehicles', icon: 'vehicles', label: 'السيارات', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'] },
-      { href: '/customers', icon: 'customers', label: 'العملاء', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
-      { href: '/appointments', icon: 'appointments', label: 'المواعيد', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'] },
+      { href: '/work-orders', icon: 'workOrders', label: 'طلبات الخدمة', labelKey: 'nav.workOrders', badge: null, roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'] },
+      { href: '/vehicles', icon: 'vehicles', label: 'السيارات', labelKey: 'nav.vehicles', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'] },
+      { href: '/customers', icon: 'customers', label: 'العملاء', labelKey: 'nav.customers', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
+      { href: '/appointments', icon: 'appointments', label: 'المواعيد', labelKey: 'nav.appointments', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'RECEPTIONIST'] },
     ],
   },
   {
-    label: 'المخزون',
+    label: 'المخزون', labelKey: 'nav.inventorySection',
     items: [
-      { href: '/inventory', icon: 'inventory', label: 'المخزون', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
-      { href: '/suppliers', icon: 'suppliers', label: 'الموردون', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
-      { href: '/purchase-orders', icon: 'purchaseOrders', label: 'طلبات الشراء', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
+      { href: '/inventory', icon: 'inventory', label: 'المخزون', labelKey: 'nav.inventory', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
+      { href: '/suppliers', icon: 'suppliers', label: 'الموردون', labelKey: 'nav.suppliers', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
+      { href: '/purchase-orders', icon: 'purchaseOrders', label: 'طلبات الشراء', labelKey: 'nav.purchaseOrders', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
     ],
   },
   {
-    label: 'المالية',
+    label: 'المالية', labelKey: 'nav.finance',
     items: [
-      { href: '/invoices', icon: 'invoices', label: 'الفواتير', roles: ['GARAGE_OWNER', 'ACCOUNTANT'] },
-      { href: '/payments', icon: 'payments', label: 'المدفوعات', roles: ['GARAGE_OWNER', 'ACCOUNTANT'] },
-      { href: '/reports', icon: 'reports', label: 'التقارير', roles: ['GARAGE_OWNER', 'ACCOUNTANT'] },
+      { href: '/invoices', icon: 'invoices', label: 'الفواتير', labelKey: 'nav.invoices', roles: ['GARAGE_OWNER', 'ACCOUNTANT'] },
+      { href: '/payments', icon: 'payments', label: 'المدفوعات', labelKey: 'nav.payments', roles: ['GARAGE_OWNER', 'ACCOUNTANT'] },
+      { href: '/reports', icon: 'reports', label: 'التقارير', labelKey: 'nav.reports', roles: ['GARAGE_OWNER', 'ACCOUNTANT'] },
     ],
   },
   {
-    label: 'الفريق',
+    label: 'الفريق', labelKey: 'nav.team',
     items: [
-      { href: '/technicians', icon: 'technicians', label: 'الفنيون', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER'] },
-      { href: '/users', icon: 'users', label: 'المستخدمون', roles: ['GARAGE_OWNER'] },
+      { href: '/technicians', icon: 'technicians', label: 'الفنيون', labelKey: 'nav.technicians', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER'] },
+      { href: '/users', icon: 'users', label: 'المستخدمون', labelKey: 'nav.users', roles: ['GARAGE_OWNER'] },
     ],
   },
   {
-    label: 'الدعم',
+    label: 'الدعم', labelKey: 'nav.support_section',
     items: [
-      { href: '/support', icon: 'support', label: 'الدعم الفني', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER'] },
-      { href: '/announcements', icon: 'announcement', label: 'إعلانات المنصة', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'] },
-      { href: '/notifications', icon: 'announcement', label: 'الإشعارات', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'] },
+      { href: '/support', icon: 'support', label: 'الدعم الفني', labelKey: 'nav.support', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER'] },
+      { href: '/announcements', icon: 'announcement', label: 'إعلانات المنصة', labelKey: 'nav.announcements', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'] },
+      { href: '/notifications', icon: 'announcement', label: 'الإشعارات', labelKey: 'nav.notifications', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST'] },
     ],
   },
 ]
@@ -189,6 +191,7 @@ const NAV_GROUPS = [
 export default function Sidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
+  const t = useT()
   const navRef = useRef<HTMLDivElement>(null)
   const [collapsed, setCollapsed] = useState(false)
 
@@ -235,12 +238,13 @@ export default function Sidebar() {
   const NavItem = ({ item }: { item: typeof NAV_GROUPS[0]['items'][0] }) => {
     const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
     const icon = Icons[item.icon as keyof typeof Icons]
+    const label = item.labelKey ? t(item.labelKey as any) : item.label
 
     return (
       <Link
         href={item.href}
         className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-        title={collapsed ? item.label : undefined}
+        title={collapsed ? label : undefined}
         style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
       >
         {/* Icon */}
@@ -264,7 +268,7 @@ export default function Sidebar() {
         {/* Label */}
         {!collapsed && (
           <span style={{ fontSize: 13.5, fontWeight: isActive ? 700 : 500 }}>
-            {item.label}
+            {label}
           </span>
         )}
 
@@ -291,7 +295,7 @@ export default function Sidebar() {
             }}
             className="sidebar-tooltip"
           >
-            {item.label}
+            {label}
           </div>
         )}
       </Link>
@@ -436,10 +440,7 @@ export default function Sidebar() {
                 {user?.name || 'المستخدم'}
               </div>
               <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 500 }}>
-                {user?.role === 'GARAGE_OWNER' ? 'مالك الكراج' :
-                 user?.role === 'BRANCH_MANAGER' ? 'مدير الفرع' :
-                 user?.role === 'ACCOUNTANT' ? 'المحاسب' :
-                 user?.role === 'RECEPTIONIST' ? 'موظف الاستقبال' : 'فني'}
+                {t(`role.${user?.role || 'TECHNICIAN'}` as any)}
               </div>
             </div>
           )}
@@ -470,7 +471,7 @@ export default function Sidebar() {
                     userSelect: 'none',
                   }}
                 >
-                  {group.label}
+                  {group.labelKey ? t(group.labelKey as any) : group.label}
                 </div>
               )}
 
@@ -495,7 +496,7 @@ export default function Sidebar() {
               href="/settings/garage"
               className={`sidebar-nav-item ${pathname.startsWith('/settings') ? 'active' : ''}`}
               style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
-              title={collapsed ? 'الإعدادات' : undefined}
+              title={collapsed ? t('nav.settings') : undefined}
             >
               <span
                 style={{
@@ -513,7 +514,7 @@ export default function Sidebar() {
               >
                 {Icons.settings}
               </span>
-              {!collapsed && <span style={{ fontSize: 13.5, fontWeight: 500 }}>الإعدادات</span>}
+              {!collapsed && <span style={{ fontSize: 13.5, fontWeight: 500 }}>{t('nav.settings')}</span>}
             </Link>
           )}
 
@@ -528,7 +529,7 @@ export default function Sidebar() {
               justifyContent: collapsed ? 'center' : 'flex-start',
               color: '#9ca3af',
             }}
-            title={collapsed ? 'تسجيل خروج' : undefined}
+            title={collapsed ? t('nav.logout') : undefined}
             onMouseEnter={e => {
               (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'
             }}
@@ -550,8 +551,14 @@ export default function Sidebar() {
             >
               {Icons.logout}
             </span>
-            {!collapsed && <span style={{ fontSize: 13.5, fontWeight: 500 }}>تسجيل خروج</span>}
+            {!collapsed && <span style={{ fontSize: 13.5, fontWeight: 500 }}>{t('nav.logout')}</span>}
           </button>
+
+          {!collapsed && (
+            <div style={{ padding: '10px 8px 0' }}>
+              <LanguageToggle style={{ width: '100%', justifyContent: 'center' }} />
+            </div>
+          )}
         </div>
       </aside>
     </>

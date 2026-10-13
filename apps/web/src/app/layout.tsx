@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ImpersonationBanner from '@/components/layout/ImpersonationBanner'
+import AssistantWidget from '@/components/assistant/AssistantWidget'
 
 export const metadata: Metadata = {
   title: {
@@ -63,6 +64,9 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ImpersonationBanner />
         {children}
+        {/* Renders nothing until the user is signed in, and hides itself on
+            the signed-out, public and platform-console routes. */}
+        <AssistantWidget />
       </body>
     </html>
   )

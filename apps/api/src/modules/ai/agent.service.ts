@@ -270,12 +270,29 @@ export async function runAgentTurn(params: {
   let pendingAction: AgentTurnResult['pendingAction'] = null;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
-    const result = await provider.chat({
-      messages,
-      tools,
-      cacheableSystemPrefix: true,
-      maxTokens: 4096,
-    });
+    let result;
+    try {
+      result = await provider.chat({
+        messages,
+        tools,
+        cacheableSystemPrefix: true,
+        maxTokens: 4096,
+      });
+    } catch (err) {
+      // Surface provider failures with a code instead of an opaque 500 —
+      // otherwise a bad model id or a rate limit is undebuggable in production.
+      const reason = err instanceof Error ? err.message : String(err);
+      logger.error('AI provider call failed', {
+        provider: provider.name,
+        model: provider.agentModel,
+        reason,
+      });
+      throw new AppError(
+        `AI provider (${provider.name}) failed: ${reason.slice(0, 300)}`,
+        502,
+        'AI_PROVIDER_ERROR'
+      );
+    }
 
     const cost = provider.costUsd(result.model, result.usage);
     totalTokens += result.usage.totalTokens;

@@ -136,7 +136,15 @@
       "Bash(grep -coE 'eyJhbGciOi[A-Za-z0-9_-]{20,}')",
       "Bash(xargs -I{} echo \"tokens already committed in HEAD: {}\")",
       "Bash(grep -cE 'gsk_[A-Za-z0-9]{20,}|sk-ant-|AKIA[0-9A-Z]{16}|postgresql://[^@ \"]*:[^@ \"]*@')",
-      "Bash(xargs -I{} echo \"api-key/db-string hits: {}\")"
+      "Bash(xargs -I{} echo \"api-key/db-string hits: {}\")",
+      "Bash(xargs -I{} echo \"uncommitted files remaining: {}\")",
+      "Bash(grep -c \"\\\\.env$\")",
+      "Bash(xargs -I{} echo \".env in any commit: {} \\(must be 0\\)\")",
+      "Bash(curl -s -o /dev/null -w \"API  \\(3001\\): %{http_code}\\\\n\" http://localhost:3001/health --max-time 8)",
+      "Bash(curl -s -o /dev/null -w \"WEB  \\(3005\\): %{http_code}\\\\n\" http://localhost:3005/assistant --max-time 15)",
+      "Bash(curl -s -o /dev/null -w \"prod /assistant: %{http_code}\\\\n\" https://gms-api-woad.vercel.app/assistant --max-time 20)",
+      "Bash(git pull *)",
+      "Bash(git merge *)"
     ]
   }
 }

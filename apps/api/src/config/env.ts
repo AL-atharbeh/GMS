@@ -32,6 +32,25 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional(),
   RATE_LIMIT_WINDOW_MS: z.string().default('900000'),
   RATE_LIMIT_MAX_REQUESTS: z.string().default('100'),
+
+  // ─── AI agent ──────────────────────────────────────────────────────────────
+  AI_PROVIDER: z.enum(['groq', 'anthropic']).default('groq'),
+  AI_ENABLED: z
+    .string()
+    .default('true')
+    .transform((v) => v !== 'false'),
+  GROQ_API_KEY: z.string().optional(),
+  // Model IDs are configurable because Groq retires them; verify against
+  // GET https://api.groq.com/openai/v1/models before changing.
+  GROQ_AGENT_MODEL: z.string().default('openai/gpt-oss-120b'),
+  GROQ_FAST_MODEL: z.string().default('openai/gpt-oss-20b'),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_AGENT_MODEL: z.string().default('claude-opus-5-5'),
+  ANTHROPIC_FAST_MODEL: z.string().default('claude-haiku-5-5'),
+  // Monthly token allowance per subscription plan.
+  AI_QUOTA_BASIC: z.string().default('2000000'),
+  AI_QUOTA_PROFESSIONAL: z.string().default('10000000'),
+  AI_QUOTA_ENTERPRISE: z.string().default('50000000'),
 });
 
 const parsed = envSchema.safeParse(process.env);

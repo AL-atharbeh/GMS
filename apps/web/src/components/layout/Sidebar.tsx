@@ -113,6 +113,19 @@ const Icons = {
       <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
     </svg>
   ),
+  assistant: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a3 3 0 0 1 3 3v1h1a4 4 0 0 1 4 4v1a3 3 0 0 1 0 6v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-1a3 3 0 0 1 0-6V10a4 4 0 0 1 4-4h1V5a3 3 0 0 1 3-3z"/>
+      <circle cx="9.5" cy="13" r="1.2" fill="currentColor" stroke="none"/>
+      <circle cx="14.5" cy="13" r="1.2" fill="currentColor" stroke="none"/>
+    </svg>
+  ),
+  aiUsage: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18"/>
+      <path d="M7 15l3-4 3 3 4-6"/>
+    </svg>
+  ),
   settings: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3"/>
@@ -144,6 +157,14 @@ const NAV_GROUPS = [
     items: [
       { href: '/dashboard', icon: 'dashboard', label: 'لوحة التحكم', labelKey: 'nav.dashboard', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT'] },
       { href: '/technician-dashboard', icon: 'workOrders', label: 'مهامي اليومية', labelKey: 'nav.myTasks', roles: ['TECHNICIAN'] },
+    ],
+  },
+  {
+    // Every signed-in role gets its own agent; the usage view is the owner's.
+    label: 'المساعد الذكي', labelKey: 'nav.aiSection',
+    items: [
+      { href: '/assistant', icon: 'assistant', label: 'وكيلي الذكي', labelKey: 'nav.assistant', roles: ['GARAGE_OWNER', 'BRANCH_MANAGER', 'ACCOUNTANT', 'RECEPTIONIST', 'TECHNICIAN'] },
+      { href: '/ai-usage', icon: 'aiUsage', label: 'استهلاك المساعد', labelKey: 'nav.aiUsage', roles: ['GARAGE_OWNER'] },
     ],
   },
   {

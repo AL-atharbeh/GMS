@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { validate } from '../../middleware/validate';
 import { authService } from '../auth/auth.service';
 import bcrypt from 'bcryptjs';
+import { usageByTenant, usageByUser, usageTrend } from '../ai/usage.service';
 
 const router = Router();
 router.use(authenticateSuperAdmin);
@@ -711,6 +712,49 @@ router.get('/tenants/:tenantId/details', async (req: any, res: Response) => {
       vehiclesCount,
       revenue,
       auditLogs,
+    },
+  });
+});
+
+// ─── AI Usage Across All Tenants ─────────────────────────────────────────────
+router.get('/ai-usage', async (req: any, res: Response) => {
+  const periodDays = Math.min(
+    Math.max(Number(req.query.periodDays ?? 30) || 30, 1),
+    365
+  );
+
+  const [byTenant, byUser, trend, totals] = await Promise.all([
+    usageByTenant(periodDays),
+    usageByUser(null, periodDays),
+    usageTrend(null, periodDays),
+    prisma.aiUsageLog.aggregate({
+      where: {
+        createdAt: { gte: new Date(Date.now() - periodDays * 86_400_000) },
+      },
+      _sum: {
+        totalTokens: true,
+        inputTokens: true,
+        outputTokens: true,
+        costUsd: true,
+      },
+      _count: true,
+    }),
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      periodDays,
+      totals: {
+        requests: totals._count,
+        inputTokens: totals._sum.inputTokens ?? 0,
+        outputTokens: totals._sum.outputTokens ?? 0,
+        totalTokens: totals._sum.totalTokens ?? 0,
+        costUsd: totals._sum.costUsd ?? 0,
+      },
+      byTenant,
+      topUsers: byUser.slice(0, 25),
+      trend,
     },
   });
 });

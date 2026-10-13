@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import api from '@/lib/api'
+import AiUsagePanel from '@/components/super-admin/AiUsagePanel'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Tenant {
@@ -37,7 +38,7 @@ interface SupportTicket {
 
 interface Announcement { id: string; titleAr: string; contentAr: string; targetType: string; sentAt?: string; superAdmin: { name: string } }
 
-type Section = 'dashboard' | 'tenants' | 'audit' | 'plans' | 'tickets' | 'announcements'
+type Section = 'dashboard' | 'tenants' | 'aiUsage' | 'audit' | 'plans' | 'tickets' | 'announcements'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
@@ -401,6 +402,7 @@ export default function SuperAdminPage() {
   const navItems: { key: Section; icon: string; label: string; badge?: number }[] = [
     { key: 'dashboard',     icon: '📊', label: 'لوحة المؤشرات' },
     { key: 'tenants',       icon: '🏢', label: 'الكراجات', badge: stats.totalTenants },
+    { key: 'aiUsage',       icon: '🤖', label: 'استهلاك المساعد' },
     { key: 'audit',         icon: '📋', label: 'سجل التدقيق', badge: auditLogs.length },
     { key: 'plans',         icon: '🎯', label: 'إدارة الباقات' },
     { key: 'tickets',       icon: '🎫', label: 'تذاكر الدعم', badge: tickets.filter(t => t.status === 'OPEN').length },
@@ -410,6 +412,7 @@ export default function SuperAdminPage() {
   const sectionTitles: Record<Section, string> = {
     dashboard:     'لوحة المؤشرات العامة',
     tenants:       'إدارة الكراجات المشتركة',
+    aiUsage:       'استهلاك المساعد الذكي على المنصّة',
     audit:         'سجل تدقيق المنصة',
     plans:         'إدارة خطط الاشتراك',
     tickets:       'تذاكر الدعم الفني',
@@ -693,6 +696,8 @@ export default function SuperAdminPage() {
               )}
 
               {/* ════════════════ AUDIT LOGS ════════════════ */}
+              {activeSection === 'aiUsage' && <AiUsagePanel />}
+
               {activeSection === 'audit' && (
                 <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, overflow: 'hidden' }}>
                   <div style={{ padding: '16px 20px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

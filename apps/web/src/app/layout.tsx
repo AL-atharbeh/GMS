@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ImpersonationBanner from '@/components/layout/ImpersonationBanner'
 
@@ -22,14 +22,16 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
     apple: '/favicon.ico',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
-  themeColor: '#0a0f1e',
   manifest: '/manifest.json',
+}
+
+// Next 16 no longer accepts viewport/themeColor inside the metadata export.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0a0f1e',
 }
 
 export default function RootLayout({

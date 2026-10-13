@@ -37,6 +37,7 @@ import insuranceRoutes from './modules/insurance/insurance.routes';
 import suppliersRoutes from './modules/inventory/suppliers.routes';
 import usersRoutes from './modules/users/users.routes';
 import supportRoutes from './modules/tenants/support.routes';
+import aiRoutes from './modules/ai/ai.routes';
 import { initStatementScheduler } from './modules/customers/statement.scheduler';
 
 const app = express();
@@ -123,6 +124,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/technicians', technicianRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/reports', reportRoutes);

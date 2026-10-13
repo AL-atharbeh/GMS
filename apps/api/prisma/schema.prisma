@@ -158,31 +158,31 @@ enum Language {
 // ============================================================
 
 model SuperAdmin {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String    @id @default(uuid())
+  email        String    @unique
   passwordHash String
   name         String
-  isActive     Boolean  @default(true)
+  isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  auditLogs    PlatformAuditLog[]
+  auditLogs         PlatformAuditLog[]
   sentAnnouncements Announcement[]
 
   @@map("super_admins")
 }
 
 model PlatformAuditLog {
-  id           String      @id @default(uuid())
+  id           String     @id @default(uuid())
   superAdminId String
-  superAdmin   SuperAdmin  @relation(fields: [superAdminId], references: [id])
+  superAdmin   SuperAdmin @relation(fields: [superAdminId], references: [id])
   action       String
-  targetType   String      // "tenant", "subscription", "plan"
+  targetType   String // "tenant", "subscription", "plan"
   targetId     String?
   details      Json?
   ipAddress    String?
-  createdAt    DateTime    @default(now())
+  createdAt    DateTime   @default(now())
 
   @@index([superAdminId])
   @@index([createdAt])
@@ -190,17 +190,17 @@ model PlatformAuditLog {
 }
 
 model Announcement {
-  id           String      @id @default(uuid())
+  id           String            @id @default(uuid())
   superAdminId String
-  superAdmin   SuperAdmin  @relation(fields: [superAdminId], references: [id])
+  superAdmin   SuperAdmin        @relation(fields: [superAdminId], references: [id])
   title        String
   titleAr      String?
   content      String
   contentAr    String?
-  targetType   String      @default("ALL") // "ALL", "PLAN", "SPECIFIC"
+  targetType   String            @default("ALL") // "ALL", "PLAN", "SPECIFIC"
   targetPlan   SubscriptionPlan?
   sentAt       DateTime?
-  createdAt    DateTime    @default(now())
+  createdAt    DateTime          @default(now())
 
   @@map("announcements")
 }
@@ -210,28 +210,28 @@ model Announcement {
 // ============================================================
 
 model SubscriptionPlanConfig {
-  id                String           @id @default(uuid())
-  name              SubscriptionPlan @unique
-  nameAr            String
-  nameEn            String
-  description       String?
-  descriptionAr     String?
-  monthlyPrice      Decimal          @db.Decimal(10, 2)
-  annualPrice       Decimal          @db.Decimal(10, 2)
-  maxBranches       Int
-  maxTechnicians    Int
-  maxVehiclesPerMonth Int
-  maxStorageGB      Int              @default(10)
-  hasWhatsApp       Boolean          @default(false)
-  hasAdvancedReports Boolean         @default(false)
-  hasApiAccess      Boolean          @default(false)
-  hasFleetManagement Boolean         @default(false)
-  hasPredictiveAnalytics Boolean     @default(false)
-  isActive          Boolean          @default(true)
-  trialDays         Int              @default(14)
-  sortOrder         Int              @default(0)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id                     String           @id @default(uuid())
+  name                   SubscriptionPlan @unique
+  nameAr                 String
+  nameEn                 String
+  description            String?
+  descriptionAr          String?
+  monthlyPrice           Decimal          @db.Decimal(10, 2)
+  annualPrice            Decimal          @db.Decimal(10, 2)
+  maxBranches            Int
+  maxTechnicians         Int
+  maxVehiclesPerMonth    Int
+  maxStorageGB           Int              @default(10)
+  hasWhatsApp            Boolean          @default(false)
+  hasAdvancedReports     Boolean          @default(false)
+  hasApiAccess           Boolean          @default(false)
+  hasFleetManagement     Boolean          @default(false)
+  hasPredictiveAnalytics Boolean          @default(false)
+  isActive               Boolean          @default(true)
+  trialDays              Int              @default(14)
+  sortOrder              Int              @default(0)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   tenantSubscriptions TenantSubscription[]
 
@@ -243,40 +243,42 @@ model SubscriptionPlanConfig {
 // ============================================================
 
 model Tenant {
-  id                String           @id @default(uuid())
-  name              String
-  nameAr            String?
-  slug              String           @unique // URL identifier
-  email             String           @unique
-  phone             String?
-  logo              String?
-  status            TenantStatus     @default(TRIAL)
-  trialEndsAt       DateTime?
-  timezone          String           @default("Asia/Kuwait")
-  country           String           @default("KW")
-  currency          String           @default("KWD")
-  vatNumber         String?
-  vatRate           Decimal          @default(0) @db.Decimal(5, 2)
-  defaultLanguage   Language         @default(AR)
-  settings          Json             @default("{}")
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id              String       @id @default(uuid())
+  name            String
+  nameAr          String?
+  slug            String       @unique // URL identifier
+  email           String       @unique
+  phone           String?
+  logo            String?
+  status          TenantStatus @default(TRIAL)
+  trialEndsAt     DateTime?
+  timezone        String       @default("Asia/Kuwait")
+  country         String       @default("KW")
+  currency        String       @default("KWD")
+  vatNumber       String?
+  vatRate         Decimal      @default(0) @db.Decimal(5, 2)
+  defaultLanguage Language     @default(AR)
+  settings        Json         @default("{}")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  subscription      TenantSubscription?
-  branches          Branch[]
-  users             User[]
-  customers         Customer[]
-  vehicles          Vehicle[]
-  workOrders        WorkOrder[]
-  parts             Part[]
-  laborRates        LaborRate[]
-  invoices          Invoice[]
-  notifications     Notification[]
-  inAppNotifications InAppNotification[]
-  auditLogs         AuditLog[]
-  supportTickets    SupportTicket[]
-  whatsappCampaigns WhatsAppCampaign[]
+  subscription         TenantSubscription?
+  branches             Branch[]
+  users                User[]
+  customers            Customer[]
+  vehicles             Vehicle[]
+  workOrders           WorkOrder[]
+  parts                Part[]
+  laborRates           LaborRate[]
+  invoices             Invoice[]
+  notifications        Notification[]
+  inAppNotifications   InAppNotification[]
+  auditLogs            AuditLog[]
+  supportTickets       SupportTicket[]
+  whatsappCampaigns    WhatsAppCampaign[]
   subscriptionInvoices SubscriptionInvoice[]
+  aiConversations      AiConversation[]
+  aiUsageLogs          AiUsageLog[]
 
   @@index([slug])
   @@index([status])
@@ -284,20 +286,20 @@ model Tenant {
 }
 
 model TenantSubscription {
-  id               String           @id @default(uuid())
-  tenantId         String           @unique
-  tenant           Tenant           @relation(fields: [tenantId], references: [id])
-  planId           String
-  plan             SubscriptionPlanConfig @relation(fields: [planId], references: [id])
-  billingCycle     String           @default("MONTHLY") // "MONTHLY", "ANNUAL"
+  id                 String                 @id @default(uuid())
+  tenantId           String                 @unique
+  tenant             Tenant                 @relation(fields: [tenantId], references: [id])
+  planId             String
+  plan               SubscriptionPlanConfig @relation(fields: [planId], references: [id])
+  billingCycle       String                 @default("MONTHLY") // "MONTHLY", "ANNUAL"
   currentPeriodStart DateTime
-  currentPeriodEnd DateTime
-  cancelledAt      DateTime?
-  cancelReason     String?
-  stripeCustomerId String?
-  paymentGatewayId String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  currentPeriodEnd   DateTime
+  cancelledAt        DateTime?
+  cancelReason       String?
+  stripeCustomerId   String?
+  paymentGatewayId   String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
 
   @@index([tenantId])
   @@map("tenant_subscriptions")
@@ -326,34 +328,36 @@ model SubscriptionInvoice {
 // ============================================================
 
 model User {
-  id              String      @id @default(uuid())
-  tenantId        String
-  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branchId        String?
-  branch          Branch?     @relation(fields: [branchId], references: [id])
-  email           String      @unique
-  passwordHash    String
-  name            String
-  nameAr          String?
-  phone           String?
-  avatar          String?
-  role            UserRole    @default(TECHNICIAN)
-  isActive        Boolean     @default(true)
-  preferredLanguage Language  @default(AR)
-  lastLoginAt     DateTime?
-  emailVerifiedAt DateTime?
-  resetToken      String?
+  id                  String    @id @default(uuid())
+  tenantId            String
+  tenant              Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId            String?
+  branch              Branch?   @relation(fields: [branchId], references: [id])
+  email               String    @unique
+  passwordHash        String
+  name                String
+  nameAr              String?
+  phone               String?
+  avatar              String?
+  role                UserRole  @default(TECHNICIAN)
+  isActive            Boolean   @default(true)
+  preferredLanguage   Language  @default(AR)
+  lastLoginAt         DateTime?
+  emailVerifiedAt     DateTime?
+  resetToken          String?
   resetTokenExpiresAt DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  technician      Technician?
-  refreshTokens   RefreshToken[]
-  auditLogs       AuditLog[]
-  assignedTasks   TaskAssignment[]
-  qualityChecks   QualityCheck[]
-  createdWorkOrders WorkOrder[] @relation("CreatedByUser")
-  receivedVehicles Vehicle[]   @relation("ReceivedByUser")
+  technician        Technician?
+  refreshTokens     RefreshToken[]
+  auditLogs         AuditLog[]
+  assignedTasks     TaskAssignment[]
+  qualityChecks     QualityCheck[]
+  createdWorkOrders WorkOrder[]      @relation("CreatedByUser")
+  receivedVehicles  Vehicle[]        @relation("ReceivedByUser")
+  aiConversations   AiConversation[]
+  aiUsageLogs       AiUsageLog[]
 
   @@index([tenantId])
   @@index([role])
@@ -361,14 +365,14 @@ model User {
 }
 
 model RefreshToken {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token       String   @unique
-  expiresAt   DateTime
-  userAgent   String?
-  ipAddress   String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@map("refresh_tokens")
@@ -379,30 +383,30 @@ model RefreshToken {
 // ============================================================
 
 model Branch {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  name        String
-  nameAr      String?
-  address     String?
-  addressAr   String?
-  city        String?
-  phone       String?
-  email       String?
-  latitude    Decimal? @db.Decimal(10, 8)
-  longitude   Decimal? @db.Decimal(11, 8)
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name          String
+  nameAr        String?
+  address       String?
+  addressAr     String?
+  city          String?
+  phone         String?
+  email         String?
+  latitude      Decimal? @db.Decimal(10, 8)
+  longitude     Decimal? @db.Decimal(11, 8)
   googleMapsUrl String?
-  isActive    Boolean  @default(true)
-  workingHours Json    @default("{}")  // {mon: {open: "08:00", close: "18:00"}, ...}
-  dailyCapacity Int    @default(10)    // max vehicles per day
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive      Boolean  @default(true)
+  workingHours  Json     @default("{}") // {mon: {open: "08:00", close: "18:00"}, ...}
+  dailyCapacity Int      @default(10) // max vehicles per day
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  users       User[]
-  workOrders  WorkOrder[]
+  users        User[]
+  workOrders   WorkOrder[]
   appointments Appointment[]
-  inventory   Inventory[]
-  technicians Technician[]
+  inventory    Inventory[]
+  technicians  Technician[]
 
   @@index([tenantId])
   @@map("branches")
@@ -413,39 +417,39 @@ model Branch {
 // ============================================================
 
 model Customer {
-  id                String    @id @default(uuid())
-  tenantId          String
-  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  name              String
-  nameAr            String?
-  phone             String
-  email             String?
-  nationalId        String?
-  type              String    @default("INDIVIDUAL") // "INDIVIDUAL", "FLEET"
-  companyName       String?
-  companyNameAr     String?
-  companyTaxNumber  String?
-  address           String?
-  preferredLanguage Language  @default(AR)
-  loyaltyPoints     Int       @default(0)
-  totalSpent        Decimal   @default(0) @db.Decimal(12, 2)
-  visitCount        Int       @default(0)
-  referralCode      String?   @unique
-  referredBy        String?   // customerId who referred
-  notes             String?
-  isBlacklisted     Boolean   @default(false)
-  blacklistReason   String?
+  id                     String   @id @default(uuid())
+  tenantId               String
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name                   String
+  nameAr                 String?
+  phone                  String
+  email                  String?
+  nationalId             String?
+  type                   String   @default("INDIVIDUAL") // "INDIVIDUAL", "FLEET"
+  companyName            String?
+  companyNameAr          String?
+  companyTaxNumber       String?
+  address                String?
+  preferredLanguage      Language @default(AR)
+  loyaltyPoints          Int      @default(0)
+  totalSpent             Decimal  @default(0) @db.Decimal(12, 2)
+  visitCount             Int      @default(0)
+  referralCode           String?  @unique
+  referredBy             String? // customerId who referred
+  notes                  String?
+  isBlacklisted          Boolean  @default(false)
+  blacklistReason        String?
   preferredContactMethod String? // "WHATSAPP", "SMS", "CALL"
-  optInMarketing         Boolean?  @default(true)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  optInMarketing         Boolean? @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
-  vehicles          CustomerVehicle[]
-  workOrders        WorkOrder[]
-  invoices          Invoice[]
+  vehicles            CustomerVehicle[]
+  workOrders          WorkOrder[]
+  invoices            Invoice[]
   loyaltyTransactions LoyaltyTransaction[]
-  reviews           Review[]
-  fleetContracts    FleetContract[]
+  reviews             Review[]
+  fleetContracts      FleetContract[]
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -454,47 +458,47 @@ model Customer {
 }
 
 model CustomerVehicle {
-  id            String    @id @default(uuid())
-  customerId    String
-  customer      Customer  @relation(fields: [customerId], references: [id])
-  vehicleId     String    @unique
-  vehicle       Vehicle   @relation(fields: [vehicleId], references: [id])
-  isPrimary     Boolean   @default(false)
-  assignedAt    DateTime  @default(now())
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  vehicleId  String   @unique
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  isPrimary  Boolean  @default(false)
+  assignedAt DateTime @default(now())
 
   @@index([customerId])
   @@map("customer_vehicles")
 }
 
 model LoyaltyTransaction {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id])
-  points      Int      // positive = earned, negative = redeemed
-  type        String   // "EARNED", "REDEEMED", "EXPIRED", "BONUS"
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  points      Int // positive = earned, negative = redeemed
+  type        String // "EARNED", "REDEEMED", "EXPIRED", "BONUS"
   description String?
   workOrderId String?
   expiresAt   DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([customerId])
   @@map("loyalty_transactions")
 }
 
 model FleetContract {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   customerId      String
-  customer        Customer  @relation(fields: [customerId], references: [id])
-  contractNumber  String    @unique
+  customer        Customer @relation(fields: [customerId], references: [id])
+  contractNumber  String   @unique
   startDate       DateTime
   endDate         DateTime
-  creditLimit     Decimal   @db.Decimal(12, 2)
-  currentBalance  Decimal   @default(0) @db.Decimal(12, 2)
-  discountPercent Decimal   @default(0) @db.Decimal(5, 2)
-  paymentTermDays Int       @default(30)
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  creditLimit     Decimal  @db.Decimal(12, 2)
+  currentBalance  Decimal  @default(0) @db.Decimal(12, 2)
+  discountPercent Decimal  @default(0) @db.Decimal(5, 2)
+  paymentTermDays Int      @default(30)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([customerId])
   @@map("fleet_contracts")
@@ -505,35 +509,35 @@ model FleetContract {
 // ============================================================
 
 model Vehicle {
-  id              String    @id @default(uuid())
-  tenantId        String
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  vin             String?   // Vehicle Identification Number
-  plateNumber     String
-  plateState      String?   // For multi-country
-  make            String    // Toyota, BMW, etc.
-  model           String
-  year            Int
-  color           String?
-  colorAr         String?
-  bodyType        String?   // Sedan, SUV, Truck...
-  engineSize      String?
-  fuelType        String?   // Petrol, Diesel, Electric, Hybrid
-  transmissionType String?  // Auto, Manual
-  mileageAtFirst  Int?      // First visit mileage
-  qrCode          String?   // QR Code value
-  qrCodeImage     String?   // S3 URL of QR image
-  notes           String?
-  photoUrl        String?
-  receivedById    String?
-  receivedBy      User?     @relation("ReceivedByUser", fields: [receivedById], references: [id])
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id               String   @id @default(uuid())
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vin              String? // Vehicle Identification Number
+  plateNumber      String
+  plateState       String? // For multi-country
+  make             String // Toyota, BMW, etc.
+  model            String
+  year             Int
+  color            String?
+  colorAr          String?
+  bodyType         String? // Sedan, SUV, Truck...
+  engineSize       String?
+  fuelType         String? // Petrol, Diesel, Electric, Hybrid
+  transmissionType String? // Auto, Manual
+  mileageAtFirst   Int? // First visit mileage
+  qrCode           String? // QR Code value
+  qrCodeImage      String? // S3 URL of QR image
+  notes            String?
+  photoUrl         String?
+  receivedById     String?
+  receivedBy       User?    @relation("ReceivedByUser", fields: [receivedById], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  customerVehicle CustomerVehicle?
-  workOrders      WorkOrder[]
+  customerVehicle      CustomerVehicle?
+  workOrders           WorkOrder[]
   maintenanceReminders MaintenanceReminder[]
-  vehicleHistory  VehicleHistoryEntry[]
+  vehicleHistory       VehicleHistoryEntry[]
 
   @@unique([tenantId, plateNumber])
   @@index([tenantId])
@@ -548,7 +552,7 @@ model VehicleHistoryEntry {
   vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
   mileage     Int?
   workOrderId String?
-  type        String   // "WORK_ORDER", "NOTE", "OWNERSHIP_CHANGE"
+  type        String // "WORK_ORDER", "NOTE", "OWNERSHIP_CHANGE"
   description String
   createdAt   DateTime @default(now())
 
@@ -560,7 +564,7 @@ model MaintenanceReminder {
   id              String    @id @default(uuid())
   vehicleId       String
   vehicle         Vehicle   @relation(fields: [vehicleId], references: [id])
-  type            String    // "OIL_CHANGE", "TIRE_ROTATION", "INSPECTION"...
+  type            String // "OIL_CHANGE", "TIRE_ROTATION", "INSPECTION"...
   dueDate         DateTime?
   dueMileage      Int?
   lastServiceDate DateTime?
@@ -580,81 +584,81 @@ model MaintenanceReminder {
 // ============================================================
 
 model WorkOrder {
-  id                String          @id @default(uuid())
-  tenantId          String
-  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  branchId          String
-  branch            Branch          @relation(fields: [branchId], references: [id])
-  orderNumber       String          // AUTO-GENERATED: WO-2024-0001
-  vehicleId         String
-  vehicle           Vehicle         @relation(fields: [vehicleId], references: [id])
-  customerId        String?
-  customer          Customer?       @relation(fields: [customerId], references: [id])
-  createdById       String
-  createdBy         User            @relation("CreatedByUser", fields: [createdById], references: [id])
-  status            WorkOrderStatus @default(RECEIVED)
-  priority          String          @default("NORMAL") // "LOW", "NORMAL", "HIGH", "URGENT"
-  
+  id          String          @id @default(uuid())
+  tenantId    String
+  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId    String
+  branch      Branch          @relation(fields: [branchId], references: [id])
+  orderNumber String // AUTO-GENERATED: WO-2024-0001
+  vehicleId   String
+  vehicle     Vehicle         @relation(fields: [vehicleId], references: [id])
+  customerId  String?
+  customer    Customer?       @relation(fields: [customerId], references: [id])
+  createdById String
+  createdBy   User            @relation("CreatedByUser", fields: [createdById], references: [id])
+  status      WorkOrderStatus @default(RECEIVED)
+  priority    String          @default("NORMAL") // "LOW", "NORMAL", "HIGH", "URGENT"
+
   // Mileage at reception
   mileageAtReception Int?
-  
-  // Customer complaints
-  customerComplaints String?
-  customerComplaintsAr String?
-  
-  // Diagnosis
-  diagnosisNotes    String?
-  diagnosisDiagram  Json?   // {points: [{x, y, label, severity}]}
-  
-  // Timeline
-  receivedAt        DateTime        @default(now())
-  diagnosedAt       DateTime?
-  quotedAt          DateTime?
-  approvedAt        DateTime?
-  workStartedAt     DateTime?
-  qualityCheckedAt  DateTime?
-  readyAt           DateTime?
-  deliveredAt       DateTime?
-  estimatedReadyAt  DateTime?
-  
-  // Customer approval
-  approvalToken     String?         @unique
-  approvalMethod    String?         // "IN_PERSON", "WHATSAPP", "LINK"
-  rejectionReason   String?
-  
-  // Tracking
-  trackingToken     String?         @unique
-  
-  // Costs
-  laborCost         Decimal         @default(0) @db.Decimal(10, 2)
-  partsCost         Decimal         @default(0) @db.Decimal(10, 2)
-  discountAmount    Decimal         @default(0) @db.Decimal(10, 2)
-  discountReason    String?
-  taxAmount         Decimal         @default(0) @db.Decimal(10, 2)
-  totalAmount       Decimal         @default(0) @db.Decimal(10, 2)
-  
-  // Internal notes
-  internalNotes     String?
-  
-  // Warranty info
-  warrantyDays      Int             @default(0)
-  warrantyMileage   Int             @default(0)
-  
-  // Photos
-  photos            WorkOrderPhoto[]
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
 
-  workOrderItems    WorkOrderItem[]
-  taskAssignments   TaskAssignment[]
-  invoice           Invoice?
-  qualityChecks     QualityCheck[]
-  statusHistory     WorkOrderStatusHistory[]
-  notifications     Notification[]
-  complaints        Complaint[]
-  warrantyRecords   WarrantyRecord[]
-  partRequests      PartRequest[]
+  // Customer complaints
+  customerComplaints   String?
+  customerComplaintsAr String?
+
+  // Diagnosis
+  diagnosisNotes   String?
+  diagnosisDiagram Json? // {points: [{x, y, label, severity}]}
+
+  // Timeline
+  receivedAt       DateTime  @default(now())
+  diagnosedAt      DateTime?
+  quotedAt         DateTime?
+  approvedAt       DateTime?
+  workStartedAt    DateTime?
+  qualityCheckedAt DateTime?
+  readyAt          DateTime?
+  deliveredAt      DateTime?
+  estimatedReadyAt DateTime?
+
+  // Customer approval
+  approvalToken   String? @unique
+  approvalMethod  String? // "IN_PERSON", "WHATSAPP", "LINK"
+  rejectionReason String?
+
+  // Tracking
+  trackingToken String? @unique
+
+  // Costs
+  laborCost      Decimal @default(0) @db.Decimal(10, 2)
+  partsCost      Decimal @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal @default(0) @db.Decimal(10, 2)
+  discountReason String?
+  taxAmount      Decimal @default(0) @db.Decimal(10, 2)
+  totalAmount    Decimal @default(0) @db.Decimal(10, 2)
+
+  // Internal notes
+  internalNotes String?
+
+  // Warranty info
+  warrantyDays    Int @default(0)
+  warrantyMileage Int @default(0)
+
+  // Photos
+  photos WorkOrderPhoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workOrderItems  WorkOrderItem[]
+  taskAssignments TaskAssignment[]
+  invoice         Invoice?
+  qualityChecks   QualityCheck[]
+  statusHistory   WorkOrderStatusHistory[]
+  notifications   Notification[]
+  complaints      Complaint[]
+  warrantyRecords WarrantyRecord[]
+  partRequests    PartRequest[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId])
@@ -666,79 +670,79 @@ model WorkOrder {
 }
 
 model WorkOrderPhoto {
-  id              String    @id @default(uuid())
-  workOrderId     String
-  workOrder       WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
-  url             String
-  thumbnailUrl    String?
-  type            String    // "RECEPTION", "COMPLETION", "DIAGNOSIS", "DEFECT"
-  caption         String?
-  capturedAt      DateTime  @default(now())
-  uploadedById    String?
-  sortOrder       Int       @default(0)
-  createdAt       DateTime  @default(now())
+  id           String    @id @default(uuid())
+  workOrderId  String
+  workOrder    WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  url          String
+  thumbnailUrl String?
+  type         String // "RECEPTION", "COMPLETION", "DIAGNOSIS", "DEFECT"
+  caption      String?
+  capturedAt   DateTime  @default(now())
+  uploadedById String?
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
 
   @@index([workOrderId])
   @@map("work_order_photos")
 }
 
 model WorkOrderItem {
-  id            String    @id @default(uuid())
-  workOrderId   String
-  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
-  type          String    // "LABOR", "PART"
-  laborRateId   String?
-  laborRate     LaborRate? @relation(fields: [laborRateId], references: [id])
-  partId        String?
-  part          Part?     @relation(fields: [partId], references: [id])
-  description   String
-  descriptionAr String?
-  quantity      Decimal   @db.Decimal(10, 3)
-  unitPrice     Decimal   @db.Decimal(10, 2)
-  costPrice     Decimal   @default(0) @db.Decimal(10, 2) // actual cost for margin tracking
-  discountPercent Decimal @default(0) @db.Decimal(5, 2)
-  totalPrice    Decimal   @db.Decimal(10, 2)
-  isApproved    Boolean   @default(true)
-  completedAt   DateTime?
-  warrantyDays  Int       @default(0)
-  notes         String?
-  sortOrder     Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String     @id @default(uuid())
+  workOrderId     String
+  workOrder       WorkOrder  @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  type            String // "LABOR", "PART"
+  laborRateId     String?
+  laborRate       LaborRate? @relation(fields: [laborRateId], references: [id])
+  partId          String?
+  part            Part?      @relation(fields: [partId], references: [id])
+  description     String
+  descriptionAr   String?
+  quantity        Decimal    @db.Decimal(10, 3)
+  unitPrice       Decimal    @db.Decimal(10, 2)
+  costPrice       Decimal    @default(0) @db.Decimal(10, 2) // actual cost for margin tracking
+  discountPercent Decimal    @default(0) @db.Decimal(5, 2)
+  totalPrice      Decimal    @db.Decimal(10, 2)
+  isApproved      Boolean    @default(true)
+  completedAt     DateTime?
+  warrantyDays    Int        @default(0)
+  notes           String?
+  sortOrder       Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   @@index([workOrderId])
   @@map("work_order_items")
 }
 
 model WorkOrderStatusHistory {
-  id          String          @id @default(uuid())
+  id          String           @id @default(uuid())
   workOrderId String
-  workOrder   WorkOrder       @relation(fields: [workOrderId], references: [id])
+  workOrder   WorkOrder        @relation(fields: [workOrderId], references: [id])
   fromStatus  WorkOrderStatus?
   toStatus    WorkOrderStatus
   changedById String?
   notes       String?
-  createdAt   DateTime        @default(now())
+  createdAt   DateTime         @default(now())
 
   @@index([workOrderId])
   @@map("work_order_status_history")
 }
 
 model WarrantyRecord {
-  id            String    @id @default(uuid())
-  workOrderId   String
-  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id])
-  itemType      String    // "PART", "LABOR"
-  itemId        String?
-  description   String
-  warrantyDays  Int
-  warrantyMileage Int?
-  startsAt      DateTime
-  expiresAt     DateTime
-  isVoided      Boolean   @default(false)
-  voidReason    String?
+  id                String    @id @default(uuid())
+  workOrderId       String
+  workOrder         WorkOrder @relation(fields: [workOrderId], references: [id])
+  itemType          String // "PART", "LABOR"
+  itemId            String?
+  description       String
+  warrantyDays      Int
+  warrantyMileage   Int?
+  startsAt          DateTime
+  expiresAt         DateTime
+  isVoided          Boolean   @default(false)
+  voidReason        String?
   returnWorkOrderId String? // if customer returned for warranty
-  createdAt     DateTime  @default(now())
+  createdAt         DateTime  @default(now())
 
   @@index([workOrderId])
   @@index([expiresAt])
@@ -750,22 +754,22 @@ model WarrantyRecord {
 // ============================================================
 
 model Technician {
-  id              String              @id @default(uuid())
-  userId          String              @unique
-  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenantId        String
-  branchId        String?
-  branch          Branch?             @relation(fields: [branchId], references: [id])
-  employeeId      String?
-  specialties     TechnicianSpecialty[]
-  hourlyRate      Decimal?            @db.Decimal(10, 2)
-  commissionPercent Decimal           @default(0) @db.Decimal(5, 2)
-  isAvailable     Boolean             @default(true)
-  workingHours    Json                @default("{}")
-  skillLevel      String              @default("JUNIOR") // "JUNIOR", "MID", "SENIOR", "EXPERT"
-  certifications  String[]
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  id                String                @id @default(uuid())
+  userId            String                @unique
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId          String
+  branchId          String?
+  branch            Branch?               @relation(fields: [branchId], references: [id])
+  employeeId        String?
+  specialties       TechnicianSpecialty[]
+  hourlyRate        Decimal?              @db.Decimal(10, 2)
+  commissionPercent Decimal               @default(0) @db.Decimal(5, 2)
+  isAvailable       Boolean               @default(true)
+  workingHours      Json                  @default("{}")
+  skillLevel        String                @default("JUNIOR") // "JUNIOR", "MID", "SENIOR", "EXPERT"
+  certifications    String[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
 
   taskAssignments TaskAssignment[]
   performance     TechnicianPerformance[]
@@ -777,25 +781,25 @@ model Technician {
 }
 
 model TaskAssignment {
-  id              String        @id @default(uuid())
-  workOrderId     String
-  workOrder       WorkOrder     @relation(fields: [workOrderId], references: [id])
-  technicianId    String
-  technician      Technician    @relation(fields: [technicianId], references: [id])
-  assignedById    String
-  assignedBy      User          @relation(fields: [assignedById], references: [id])
-  specialty       TechnicianSpecialty
-  status          TaskStatus    @default(PENDING)
-  estimatedHours  Decimal?      @db.Decimal(5, 2)
-  actualHours     Decimal?      @db.Decimal(5, 2)
-  startedAt       DateTime?
-  completedAt     DateTime?
-  notes           String?
-  reworkCount     Int           @default(0)
-  reworkStatus    String?       @default("NONE") // NONE, PENDING, CONFIRMED, DISMISSED
-  reworkReason    String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id             String              @id @default(uuid())
+  workOrderId    String
+  workOrder      WorkOrder           @relation(fields: [workOrderId], references: [id])
+  technicianId   String
+  technician     Technician          @relation(fields: [technicianId], references: [id])
+  assignedById   String
+  assignedBy     User                @relation(fields: [assignedById], references: [id])
+  specialty      TechnicianSpecialty
+  status         TaskStatus          @default(PENDING)
+  estimatedHours Decimal?            @db.Decimal(5, 2)
+  actualHours    Decimal?            @db.Decimal(5, 2)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  notes          String?
+  reworkCount    Int                 @default(0)
+  reworkStatus   String?             @default("NONE") // NONE, PENDING, CONFIRMED, DISMISSED
+  reworkReason   String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([workOrderId])
   @@index([technicianId])
@@ -803,34 +807,34 @@ model TaskAssignment {
 }
 
 model TechnicianPerformance {
-  id                  String     @id @default(uuid())
-  technicianId        String
-  technician          Technician @relation(fields: [technicianId], references: [id])
-  periodStart         DateTime
-  periodEnd           DateTime
-  vehiclesCompleted   Int        @default(0)
-  avgCompletionHours  Decimal?   @db.Decimal(8, 2)
-  reworkRate          Decimal?   @db.Decimal(5, 2) // percentage
-  customerRating      Decimal?   @db.Decimal(3, 2)
-  revenueGenerated    Decimal    @default(0) @db.Decimal(12, 2)
-  createdAt           DateTime   @default(now())
+  id                 String     @id @default(uuid())
+  technicianId       String
+  technician         Technician @relation(fields: [technicianId], references: [id])
+  periodStart        DateTime
+  periodEnd          DateTime
+  vehiclesCompleted  Int        @default(0)
+  avgCompletionHours Decimal?   @db.Decimal(8, 2)
+  reworkRate         Decimal?   @db.Decimal(5, 2) // percentage
+  customerRating     Decimal?   @db.Decimal(3, 2)
+  revenueGenerated   Decimal    @default(0) @db.Decimal(12, 2)
+  createdAt          DateTime   @default(now())
 
   @@index([technicianId])
   @@map("technician_performance")
 }
 
 model TechnicianCommission {
-  id            String     @id @default(uuid())
-  technicianId  String
-  technician    Technician @relation(fields: [technicianId], references: [id])
-  workOrderId   String?
-  invoiceId     String?
-  amount        Decimal    @db.Decimal(10, 2)
-  percentage    Decimal    @db.Decimal(5, 2)
-  status        String     @default("PENDING") // "PENDING", "PAID"
-  paidAt        DateTime?
-  notes         String?
-  createdAt     DateTime   @default(now())
+  id           String     @id @default(uuid())
+  technicianId String
+  technician   Technician @relation(fields: [technicianId], references: [id])
+  workOrderId  String?
+  invoiceId    String?
+  amount       Decimal    @db.Decimal(10, 2)
+  percentage   Decimal    @db.Decimal(5, 2)
+  status       String     @default("PENDING") // "PENDING", "PAID"
+  paidAt       DateTime?
+  notes        String?
+  createdAt    DateTime   @default(now())
 
   @@index([technicianId])
   @@map("technician_commissions")
@@ -841,27 +845,27 @@ model TechnicianCommission {
 // ============================================================
 
 model Appointment {
-  id              String              @id @default(uuid())
-  tenantId        String
-  branchId        String
-  branch          Branch              @relation(fields: [branchId], references: [id])
-  customerId      String?
-  customerName    String?
-  customerPhone   String?
-  vehiclePlate    String?
-  vehicleMake     String?
-  vehicleModel    String?
-  serviceType     String?
-  description     String?
-  scheduledAt     DateTime
+  id                String            @id @default(uuid())
+  tenantId          String
+  branchId          String
+  branch            Branch            @relation(fields: [branchId], references: [id])
+  customerId        String?
+  customerName      String?
+  customerPhone     String?
+  vehiclePlate      String?
+  vehicleMake       String?
+  vehicleModel      String?
+  serviceType       String?
+  description       String?
+  scheduledAt       DateTime
   estimatedDuration Int               @default(60) // minutes
-  status          AppointmentStatus  @default(SCHEDULED)
-  workOrderId     String?
-  reminderSent    Boolean             @default(false)
-  reminderSentAt  DateTime?
-  notes           String?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  status            AppointmentStatus @default(SCHEDULED)
+  workOrderId       String?
+  reminderSent      Boolean           @default(false)
+  reminderSentAt    DateTime?
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([tenantId])
   @@index([branchId])
@@ -874,22 +878,22 @@ model Appointment {
 // ============================================================
 
 model LaborRate {
-  id              String    @id @default(uuid())
-  tenantId        String
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  category        String    // "OIL_CHANGE", "BRAKE_SERVICE", etc.
-  name            String
-  nameAr          String?
-  description     String?
-  basePrice       Decimal   @db.Decimal(10, 2)
-  vehicleTypePricing Json   @default("{}") // {Sedan: 50, SUV: 70, Truck: 90}
-  estimatedMinutes Int      @default(60)
-  isActive        Boolean   @default(true)
-  sortOrder       Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                 String   @id @default(uuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category           String // "OIL_CHANGE", "BRAKE_SERVICE", etc.
+  name               String
+  nameAr             String?
+  description        String?
+  basePrice          Decimal  @db.Decimal(10, 2)
+  vehicleTypePricing Json     @default("{}") // {Sedan: 50, SUV: 70, Truck: 90}
+  estimatedMinutes   Int      @default(60)
+  isActive           Boolean  @default(true)
+  sortOrder          Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  workOrderItems  WorkOrderItem[]
+  workOrderItems WorkOrderItem[]
 
   @@index([tenantId])
   @@map("labor_rates")
@@ -900,32 +904,32 @@ model LaborRate {
 // ============================================================
 
 model Part {
-  id              String    @id @default(uuid())
-  tenantId        String
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  partNumber      String
-  barcode         String?
-  name            String
-  nameAr          String?
-  description     String?
-  category        String?
-  brand           String?
+  id                   String   @id @default(uuid())
+  tenantId             String
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  partNumber           String
+  barcode              String?
+  name                 String
+  nameAr               String?
+  description          String?
+  category             String?
+  brand                String?
   vehicleCompatibility String[] // ["Toyota Camry 2018-2023", ...]
-  unit            String    @default("PCS") // "PCS", "LITER", "METER", "KG"
-  purchasePrice   Decimal   @db.Decimal(10, 2)
-  sellingPrice    Decimal   @db.Decimal(10, 2)
-  marginPercent   Decimal?  @db.Decimal(5, 2)
-  isActive        Boolean   @default(true)
-  warrantyDays    Int       @default(0)
-  imageUrl        String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  unit                 String   @default("PCS") // "PCS", "LITER", "METER", "KG"
+  purchasePrice        Decimal  @db.Decimal(10, 2)
+  sellingPrice         Decimal  @db.Decimal(10, 2)
+  marginPercent        Decimal? @db.Decimal(5, 2)
+  isActive             Boolean  @default(true)
+  warrantyDays         Int      @default(0)
+  imageUrl             String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  inventory       Inventory[]
-  workOrderItems  WorkOrderItem[]
-  partRequests    PartRequest[]
+  inventory          Inventory[]
+  workOrderItems     WorkOrderItem[]
+  partRequests       PartRequest[]
   purchaseOrderItems PurchaseOrderItem[]
-  suppliers       PartSupplier[]
+  suppliers          PartSupplier[]
 
   @@unique([tenantId, partNumber])
   @@index([tenantId])
@@ -945,12 +949,12 @@ model Inventory {
   minStockLevel   Decimal   @default(0) @db.Decimal(10, 3)
   maxStockLevel   Decimal   @default(0) @db.Decimal(10, 3)
   reorderPoint    Decimal   @default(0) @db.Decimal(10, 3)
-  location        String?   // Shelf/Bin location in warehouse
+  location        String? // Shelf/Bin location in warehouse
   lastRestockedAt DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  transactions    InventoryTransaction[]
+  transactions InventoryTransaction[]
 
   @@unique([partId, branchId])
   @@index([partId])
@@ -962,9 +966,9 @@ model InventoryTransaction {
   id            String    @id @default(uuid())
   inventoryId   String
   inventory     Inventory @relation(fields: [inventoryId], references: [id])
-  type          String    // "IN", "OUT", "ADJUSTMENT", "RESERVED", "UNRESERVED"
+  type          String // "IN", "OUT", "ADJUSTMENT", "RESERVED", "UNRESERVED"
   quantity      Decimal   @db.Decimal(10, 3)
-  referenceType String?   // "WORK_ORDER", "PURCHASE_ORDER", "MANUAL"
+  referenceType String? // "WORK_ORDER", "PURCHASE_ORDER", "MANUAL"
   referenceId   String?
   notes         String?
   userId        String?
@@ -976,7 +980,7 @@ model InventoryTransaction {
 }
 
 model Supplier {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   tenantId        String
   name            String
   nameAr          String?
@@ -985,30 +989,30 @@ model Supplier {
   email           String?
   contactPerson   String?
   address         String?
-  paymentTermDays Int       @default(30)
-  isActive        Boolean   @default(true)
+  paymentTermDays Int      @default(30)
+  isActive        Boolean  @default(true)
   notes           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  partSuppliers   PartSupplier[]
-  purchaseOrders  PurchaseOrder[]
+  partSuppliers  PartSupplier[]
+  purchaseOrders PurchaseOrder[]
 
   @@index([tenantId])
   @@map("suppliers")
 }
 
 model PartSupplier {
-  id              String   @id @default(uuid())
-  partId          String
-  part            Part     @relation(fields: [partId], references: [id])
-  supplierId      String
-  supplier        Supplier @relation(fields: [supplierId], references: [id])
+  id                 String   @id @default(uuid())
+  partId             String
+  part               Part     @relation(fields: [partId], references: [id])
+  supplierId         String
+  supplier           Supplier @relation(fields: [supplierId], references: [id])
   supplierPartNumber String?
-  purchasePrice   Decimal  @db.Decimal(10, 2)
-  leadTimeDays    Int      @default(1)
-  isPreferred     Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  purchasePrice      Decimal  @db.Decimal(10, 2)
+  leadTimeDays       Int      @default(1)
+  isPreferred        Boolean  @default(false)
+  createdAt          DateTime @default(now())
 
   @@unique([partId, supplierId])
   @@map("part_suppliers")
@@ -1031,7 +1035,7 @@ model PurchaseOrder {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  items           PurchaseOrderItem[]
+  items PurchaseOrderItem[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId])
@@ -1055,18 +1059,18 @@ model PurchaseOrderItem {
 }
 
 model PartRequest {
-  id              String    @id @default(uuid())
-  workOrderId     String
-  workOrder       WorkOrder @relation(fields: [workOrderId], references: [id])
-  partId          String
-  part            Part      @relation(fields: [partId], references: [id])
-  requestedById   String?   // technicianId
-  quantity        Decimal   @db.Decimal(10, 3)
-  status          String    @default("PENDING") // "PENDING", "APPROVED", "ISSUED", "REJECTED"
-  approvedById    String?
-  notes           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            String    @id @default(uuid())
+  workOrderId   String
+  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id])
+  partId        String
+  part          Part      @relation(fields: [partId], references: [id])
+  requestedById String? // technicianId
+  quantity      Decimal   @db.Decimal(10, 3)
+  status        String    @default("PENDING") // "PENDING", "APPROVED", "ISSUED", "REJECTED"
+  approvedById  String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([workOrderId])
   @@map("part_requests")
@@ -1077,40 +1081,40 @@ model PartRequest {
 // ============================================================
 
 model Invoice {
-  id              String        @id @default(uuid())
-  tenantId        String
-  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  workOrderId     String        @unique
-  workOrder       WorkOrder     @relation(fields: [workOrderId], references: [id])
-  customerId      String?
-  customer        Customer?     @relation(fields: [customerId], references: [id])
-  invoiceNumber   String        // INV-2024-0001
-  status          PaymentStatus @default(PENDING)
-  
-  subtotal        Decimal       @db.Decimal(12, 2)
-  discountAmount  Decimal       @default(0) @db.Decimal(12, 2)
-  taxableAmount   Decimal       @db.Decimal(12, 2)
-  taxRate         Decimal       @default(0) @db.Decimal(5, 2)
-  taxAmount       Decimal       @default(0) @db.Decimal(12, 2)
-  total           Decimal       @db.Decimal(12, 2)
-  paidAmount      Decimal       @default(0) @db.Decimal(12, 2)
-  remainingAmount Decimal       @db.Decimal(12, 2)
-  
-  currency        String        @default("KWD")
-  notes           String?
-  termsAndConditions String?
-  pdfUrl          String?
-  
-  issuedAt        DateTime      @default(now())
-  dueAt           DateTime?
-  paidAt          DateTime?
-  
-  fleetContractId String?
-  
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id            String        @id @default(uuid())
+  tenantId      String
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workOrderId   String        @unique
+  workOrder     WorkOrder     @relation(fields: [workOrderId], references: [id])
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  invoiceNumber String // INV-2024-0001
+  status        PaymentStatus @default(PENDING)
 
-  payments        Payment[]
+  subtotal        Decimal @db.Decimal(12, 2)
+  discountAmount  Decimal @default(0) @db.Decimal(12, 2)
+  taxableAmount   Decimal @db.Decimal(12, 2)
+  taxRate         Decimal @default(0) @db.Decimal(5, 2)
+  taxAmount       Decimal @default(0) @db.Decimal(12, 2)
+  total           Decimal @db.Decimal(12, 2)
+  paidAmount      Decimal @default(0) @db.Decimal(12, 2)
+  remainingAmount Decimal @db.Decimal(12, 2)
+
+  currency           String  @default("KWD")
+  notes              String?
+  termsAndConditions String?
+  pdfUrl             String?
+
+  issuedAt DateTime  @default(now())
+  dueAt    DateTime?
+  paidAt   DateTime?
+
+  fleetContractId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments         Payment[]
   digitalSignature DigitalSignature?
 
   @@unique([tenantId, invoiceNumber])
@@ -1120,34 +1124,34 @@ model Invoice {
 }
 
 model Payment {
-  id              String        @id @default(uuid())
-  invoiceId       String
-  invoice         Invoice       @relation(fields: [invoiceId], references: [id])
-  amount          Decimal       @db.Decimal(12, 2)
-  method          PaymentMethod
-  status          PaymentStatus @default(PENDING)
+  id                   String        @id @default(uuid())
+  invoiceId            String
+  invoice              Invoice       @relation(fields: [invoiceId], references: [id])
+  amount               Decimal       @db.Decimal(12, 2)
+  method               PaymentMethod
+  status               PaymentStatus @default(PENDING)
   gatewayTransactionId String?
-  gatewayResponse Json?
-  reference       String?
-  notes           String?
-  paidAt          DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  gatewayResponse      Json?
+  reference            String?
+  notes                String?
+  paidAt               DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   @@index([invoiceId])
   @@map("payments")
 }
 
 model DigitalSignature {
-  id              String   @id @default(uuid())
-  invoiceId       String   @unique
-  invoice         Invoice  @relation(fields: [invoiceId], references: [id])
-  signatureData   String   // Base64 SVG/PNG of signature
-  signedByName    String
-  signedByPhone   String?
-  ipAddress       String?
-  userAgent       String?
-  signedAt        DateTime @default(now())
+  id            String   @id @default(uuid())
+  invoiceId     String   @unique
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  signatureData String // Base64 SVG/PNG of signature
+  signedByName  String
+  signedByPhone String?
+  ipAddress     String?
+  userAgent     String?
+  signedAt      DateTime @default(now())
 
   @@map("digital_signatures")
 }
@@ -1157,83 +1161,83 @@ model DigitalSignature {
 // ============================================================
 
 model QualityCheckTemplate {
-  id          String   @id @default(uuid())
-  tenantId    String
-  name        String
-  nameAr      String?
-  isDefault   Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  items       QualityCheckTemplateItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String                     @id @default(uuid())
+  tenantId  String
+  name      String
+  nameAr    String?
+  isDefault Boolean                    @default(false)
+  isActive  Boolean                    @default(true)
+  items     QualityCheckTemplateItem[]
+  createdAt DateTime                   @default(now())
+  updatedAt DateTime                   @updatedAt
 
   @@index([tenantId])
   @@map("quality_check_templates")
 }
 
 model QualityCheckTemplateItem {
-  id          String               @id @default(uuid())
-  templateId  String
-  template    QualityCheckTemplate @relation(fields: [templateId], references: [id])
-  name        String
-  nameAr      String?
-  category    String?
-  isRequired  Boolean              @default(true)
-  sortOrder   Int                  @default(0)
+  id         String               @id @default(uuid())
+  templateId String
+  template   QualityCheckTemplate @relation(fields: [templateId], references: [id])
+  name       String
+  nameAr     String?
+  category   String?
+  isRequired Boolean              @default(true)
+  sortOrder  Int                  @default(0)
 
-  checkItems  QualityCheckItem[]
+  checkItems QualityCheckItem[]
 
   @@index([templateId])
   @@map("quality_check_template_items")
 }
 
 model QualityCheck {
-  id              String    @id @default(uuid())
-  workOrderId     String
-  workOrder       WorkOrder @relation(fields: [workOrderId], references: [id])
-  checkedById     String
-  checkedBy       User      @relation(fields: [checkedById], references: [id])
-  isPassed        Boolean?
-  failureReason   String?
-  notes           String?
-  checkedAt       DateTime  @default(now())
-  createdAt       DateTime  @default(now())
+  id            String    @id @default(uuid())
+  workOrderId   String
+  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id])
+  checkedById   String
+  checkedBy     User      @relation(fields: [checkedById], references: [id])
+  isPassed      Boolean?
+  failureReason String?
+  notes         String?
+  checkedAt     DateTime  @default(now())
+  createdAt     DateTime  @default(now())
 
-  items           QualityCheckItem[]
+  items QualityCheckItem[]
 
   @@index([workOrderId])
   @@map("quality_checks")
 }
 
 model QualityCheckItem {
-  id              String                   @id @default(uuid())
-  qualityCheckId  String
-  qualityCheck    QualityCheck             @relation(fields: [qualityCheckId], references: [id])
-  templateItemId  String
-  templateItem    QualityCheckTemplateItem @relation(fields: [templateItemId], references: [id])
-  isPassed        Boolean
-  notes           String?
+  id             String                   @id @default(uuid())
+  qualityCheckId String
+  qualityCheck   QualityCheck             @relation(fields: [qualityCheckId], references: [id])
+  templateItemId String
+  templateItem   QualityCheckTemplateItem @relation(fields: [templateItemId], references: [id])
+  isPassed       Boolean
+  notes          String?
 
   @@index([qualityCheckId])
   @@map("quality_check_items")
 }
 
 model Complaint {
-  id              String        @id @default(uuid())
+  id              String         @id @default(uuid())
   workOrderId     String?
-  workOrder       WorkOrder?    @relation(fields: [workOrderId], references: [id])
+  workOrder       WorkOrder?     @relation(fields: [workOrderId], references: [id])
   tenantId        String
   branchId        String?
   customerId      String?
   subject         String
   description     String
-  status          TicketStatus  @default(OPEN)
+  status          TicketStatus   @default(OPEN)
   priority        TicketPriority @default(MEDIUM)
   resolvedAt      DateTime?
   resolutionNotes String?
   resolvedById    String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([tenantId])
   @@index([workOrderId])
@@ -1245,25 +1249,25 @@ model Complaint {
 // ============================================================
 
 model Notification {
-  id              String              @id @default(uuid())
-  tenantId        String
-  tenant          Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  workOrderId     String?
-  workOrder       WorkOrder?          @relation(fields: [workOrderId], references: [id])
-  customerId      String?
-  recipientPhone  String?
-  recipientEmail  String?
-  channel         NotificationChannel
-  status          NotificationStatus  @default(PENDING)
-  type            String              // "WORK_ORDER_RECEIVED", "QUOTE_READY", etc.
-  subject         String?
-  message         String
-  messageAr       String?
-  sentAt          DateTime?
-  readAt          DateTime?
-  failureReason   String?
-  metadata        Json?
-  createdAt       DateTime            @default(now())
+  id             String              @id @default(uuid())
+  tenantId       String
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workOrderId    String?
+  workOrder      WorkOrder?          @relation(fields: [workOrderId], references: [id])
+  customerId     String?
+  recipientPhone String?
+  recipientEmail String?
+  channel        NotificationChannel
+  status         NotificationStatus  @default(PENDING)
+  type           String // "WORK_ORDER_RECEIVED", "QUOTE_READY", etc.
+  subject        String?
+  message        String
+  messageAr      String?
+  sentAt         DateTime?
+  readAt         DateTime?
+  failureReason  String?
+  metadata       Json?
+  createdAt      DateTime            @default(now())
 
   @@index([tenantId])
   @@index([workOrderId])
@@ -1278,7 +1282,7 @@ model WhatsAppCampaign {
   name            String
   message         String
   messageAr       String?
-  targetType      String    // "ALL", "VEHICLE_TYPE", "LAST_VISIT"
+  targetType      String // "ALL", "VEHICLE_TYPE", "LAST_VISIT"
   targetFilters   Json?
   scheduledAt     DateTime?
   sentAt          DateTime?
@@ -1297,20 +1301,20 @@ model WhatsAppCampaign {
 // ============================================================
 
 model Review {
-  id              String   @id @default(uuid())
-  customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id])
-  tenantId        String
-  branchId        String?
-  workOrderId     String?
-  rating          Int      // 1-5
-  comment         String?
-  commentAr       String?
-  isPublic        Boolean  @default(true)
-  isVerified      Boolean  @default(true)
-  requestSentAt   DateTime?
-  submittedAt     DateTime @default(now())
-  createdAt       DateTime @default(now())
+  id            String    @id @default(uuid())
+  customerId    String
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  tenantId      String
+  branchId      String?
+  workOrderId   String?
+  rating        Int // 1-5
+  comment       String?
+  commentAr     String?
+  isPublic      Boolean   @default(true)
+  isVerified    Boolean   @default(true)
+  requestSentAt DateTime?
+  submittedAt   DateTime  @default(now())
+  createdAt     DateTime  @default(now())
 
   @@index([tenantId])
   @@index([customerId])
@@ -1336,7 +1340,7 @@ model Equipment {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  maintenanceLogs     EquipmentMaintenanceLog[]
+  maintenanceLogs EquipmentMaintenanceLog[]
 
   @@index([tenantId])
   @@map("equipment")
@@ -1346,7 +1350,7 @@ model EquipmentMaintenanceLog {
   id            String    @id @default(uuid())
   equipmentId   String
   equipment     Equipment @relation(fields: [equipmentId], references: [id])
-  type          String    // "ROUTINE", "REPAIR", "INSPECTION"
+  type          String // "ROUTINE", "REPAIR", "INSPECTION"
   description   String
   cost          Decimal?  @db.Decimal(10, 2)
   performedAt   DateTime
@@ -1364,20 +1368,20 @@ model EquipmentMaintenanceLog {
 // ============================================================
 
 model InsuranceCompany {
-  id          String   @id @default(uuid())
-  tenantId    String
-  name        String
-  nameAr      String?
-  phone       String?
-  email       String?
+  id            String   @id @default(uuid())
+  tenantId      String
+  name          String
+  nameAr        String?
+  phone         String?
+  email         String?
   contactPerson String?
-  portalUrl   String?
-  notes       String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  portalUrl     String?
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  claims      InsuranceClaim[]
+  claims InsuranceClaim[]
 
   @@index([tenantId])
   @@map("insurance_companies")
@@ -1412,19 +1416,19 @@ model InsuranceClaim {
 // ============================================================
 
 model AuditLog {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
-  action      String   // "CREATE", "UPDATE", "DELETE", "LOGIN"
-  resource    String   // "work_order", "invoice", "part"...
-  resourceId  String?
-  oldData     Json?
-  newData     Json?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String // "CREATE", "UPDATE", "DELETE", "LOGIN"
+  resource   String // "work_order", "invoice", "part"...
+  resourceId String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
 
   @@index([tenantId])
   @@index([userId])
@@ -1438,19 +1442,19 @@ model AuditLog {
 // ============================================================
 
 model SupportTicket {
-  id          String         @id @default(uuid())
-  tenantId    String
-  tenant      Tenant         @relation(fields: [tenantId], references: [id])
-  subject     String
-  description String
-  status      TicketStatus   @default(OPEN)
-  priority    TicketPriority @default(MEDIUM)
-  assignedToId String?       // super admin id
-  resolvedAt  DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id           String         @id @default(uuid())
+  tenantId     String
+  tenant       Tenant         @relation(fields: [tenantId], references: [id])
+  subject      String
+  description  String
+  status       TicketStatus   @default(OPEN)
+  priority     TicketPriority @default(MEDIUM)
+  assignedToId String? // super admin id
+  resolvedAt   DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
-  messages    SupportMessage[]
+  messages SupportMessage[]
 
   @@index([tenantId])
   @@map("support_tickets")
@@ -1460,7 +1464,7 @@ model SupportMessage {
   id          String        @id @default(uuid())
   ticketId    String
   ticket      SupportTicket @relation(fields: [ticketId], references: [id])
-  senderType  String        // "TENANT", "SUPER_ADMIN"
+  senderType  String // "TENANT", "SUPER_ADMIN"
   senderId    String
   message     String
   attachments String[]
@@ -1471,16 +1475,126 @@ model SupportMessage {
 }
 
 model InAppNotification {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  title       String
-  body        String
-  type        String   @default("SYSTEM") // "ANNOUNCEMENT", "SYSTEM", "SUPPORT"
-  sourceType  String   @default("SYSTEM") // "ANNOUNCEMENT", "SYSTEM"
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title      String
+  body       String
+  type       String   @default("SYSTEM") // "ANNOUNCEMENT", "SYSTEM", "SUPPORT"
+  sourceType String   @default("SYSTEM") // "ANNOUNCEMENT", "SYSTEM"
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   @@index([tenantId])
   @@map("in_app_notifications")
+}
+
+// ─── AI Agent ────────────────────────────────────────────────────────────────
+// Each registered user gets their own persistent agent conversation.
+// History is append-only: never edit or delete earlier messages, so that
+// provider-side reasoning state (e.g. Claude's preserved thinking) stays valid.
+
+model AiConversation {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String?
+  titleAr       String?
+  isArchived    Boolean  @default(false)
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  messages       AiMessage[]
+  pendingActions AiPendingAction[]
+  usageLogs      AiUsageLog[]
+
+  @@index([tenantId])
+  @@index([userId, lastMessageAt])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           AiMessageRole
+  // Full provider content blocks, not just text — tool calls and reasoning
+  // blocks must round-trip unchanged.
+  content        Json
+  toolCalls      Json?
+  toolCallId     String?
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+// Write-capable tools land here first and execute only after the user confirms.
+model AiPendingAction {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  tenantId       String
+  userId         String
+  toolName       String
+  toolCallId     String
+  toolInput      Json
+  // Human-readable description of the effect, shown on the confirm button.
+  summary        String
+  summaryAr      String?
+  status         AiActionStatus @default(PENDING)
+  resultPayload  Json?
+  errorMessage   String?
+  confirmedAt    DateTime?
+  executedAt     DateTime?
+  expiresAt      DateTime
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId, status])
+  @@index([tenantId, status])
+  @@map("ai_pending_actions")
+}
+
+// Token counts come from the provider's own usage payload, never estimated.
+model AiUsageLog {
+  id                String          @id @default(uuid())
+  tenantId          String
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId    String?
+  conversation      AiConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  provider          String
+  model             String
+  purpose           String          @default("AGENT") // "AGENT", "RERANK", "TITLE"
+  inputTokens       Int             @default(0)
+  outputTokens      Int             @default(0)
+  cachedInputTokens Int             @default(0)
+  totalTokens       Int             @default(0)
+  costUsd           Decimal         @default(0) @db.Decimal(12, 6)
+  latencyMs         Int?
+  createdAt         DateTime        @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@map("ai_usage_logs")
+}
+
+enum AiMessageRole {
+  USER
+  ASSISTANT
+  TOOL
+  SYSTEM
+}
+
+enum AiActionStatus {
+  PENDING
+  CONFIRMED
+  EXECUTED
+  REJECTED
+  FAILED
+  EXPIRED
 }

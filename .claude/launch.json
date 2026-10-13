@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "apps/web", "--", "-p", "3005"],
       "port": 3005
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "db:studio", "--prefix", "apps/api"],
+      "port": 5555
     }
   ]
 }

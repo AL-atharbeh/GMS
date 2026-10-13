@@ -37,13 +37,21 @@ const agentLimiter = rateLimit({
 /** Context is built from the session only — never from the request body. */
 function toolContext(req: AuthRequest): ToolContext {
   const { id, tenantId, branchId, role } = req.user!;
-  const accept = String(req.headers['accept-language'] ?? '');
+
+  // The app's own language toggle wins. accept-language describes the browser,
+  // not the interface the user chose — a Chrome set to English would otherwise
+  // force English replies on an Arabic UI.
+  const appLang = String(req.headers['x-app-language'] ?? '').toLowerCase();
+  const accept = String(req.headers['accept-language'] ?? '').toLowerCase();
+  const language: 'ar' | 'en' =
+    appLang === 'en' ? 'en' : appLang === 'ar' ? 'ar' : accept.startsWith('en') ? 'en' : 'ar';
+
   return {
     tenantId,
     userId: id,
     branchId: branchId ?? null,
     role,
-    language: accept.toLowerCase().startsWith('en') ? 'en' : 'ar',
+    language,
   };
 }
 

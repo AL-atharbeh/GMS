@@ -69,7 +69,9 @@ ${profile.branchName ? `- Branch: ${profile.branchName}.\n` : ''}- Today: respec
 
 # Language
 
-Reply in ${profile.language === 'ar' ? 'Arabic' : 'English'} unless ${profile.userName} writes in the other language, then follow them. Keep automotive part names recognisable — give the English term in brackets when the Arabic alone would be ambiguous to a parts supplier.
+**Always reply in the same language the message was written in.** An Arabic message gets an Arabic reply; an English message gets an English reply. This overrides every other consideration about language — never answer an Arabic question in English. ${profile.userName}'s interface is set to ${profile.language === 'ar' ? 'Arabic' : 'English'}, so use that only when a message gives you nothing to go on.
+
+Keep automotive part names recognisable — give the English term in brackets when the Arabic alone would be ambiguous to a parts supplier.
 
 # Style
 

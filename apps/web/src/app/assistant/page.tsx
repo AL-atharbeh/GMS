@@ -187,10 +187,16 @@ export default function AssistantPage() {
     setMessages((prev) => [...prev, { id: localId, role: 'USER', text }])
 
     try {
-      const res = await api.post('/ai/chat', {
-        message: text,
-        ...(conversationId ? { conversationId } : {}),
-      })
+      const res = await api.post(
+        '/ai/chat',
+        {
+          message: text,
+          ...(conversationId ? { conversationId } : {}),
+        },
+        // Tell the agent which language the interface is in — the browser's
+        // own accept-language says nothing about the toggle the user picked.
+        { headers: { 'X-App-Language': lang } }
+      )
       const data = res.data.data
 
       setConversationId(data.conversationId)
@@ -224,7 +230,7 @@ export default function AssistantPage() {
     } finally {
       setSending(false)
     }
-  }, [input, sending, conversationId, loadConversations, t])
+  }, [input, sending, conversationId, loadConversations, t, lang])
 
   const resolveAction = useCallback(
     async (messageId: string, actionId: string, approve: boolean) => {
@@ -511,6 +517,11 @@ export default function AssistantPage() {
                       color: '#2b3147',
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
+                      // Let each paragraph take its direction from its own
+                      // first strong character, so an English answer inside an
+                      // RTL page doesn't push its punctuation to the wrong end.
+                      unicodeBidi: 'plaintext',
+                      textAlign: 'start',
                     }}
                   >
                     {m.text}

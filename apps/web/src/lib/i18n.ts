@@ -62,6 +62,7 @@ export const translations = {
   'ai.thinking': { ar: 'يفكّر…', en: 'Thinking…' },
   'ai.newChat': { ar: 'محادثة جديدة', en: 'New chat' },
   'ai.conversations': { ar: 'محادثاتي', en: 'My chats' },
+  'ai.deleteChat': { ar: 'حذف المحادثة', en: 'Delete chat' },
   'ai.noConversations': { ar: 'لا محادثات بعد', en: 'No chats yet' },
   'ai.emptyTitle': { ar: 'اسأل وكيلك', en: 'Ask your assistant' },
   'ai.emptyBody': {

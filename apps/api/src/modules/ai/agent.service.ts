@@ -258,6 +258,10 @@ export async function runAgentTurn(params: {
 
   const history = await loadHistory(conversationId);
   await appendMessage(conversationId, { role: 'user', content: userMessage });
+  // Title from the opening question, set before the model runs: a turn that
+  // fails partway (a rate limit, say) must not leave an untitled conversation
+  // the user cannot identify in their list.
+  await maybeSetTitle(conversationId, userMessage);
 
   const messages: AgentMessage[] = [
     { role: 'system', content: systemPrompt },
@@ -448,8 +452,6 @@ export async function runAgentTurn(params: {
     where: { id: conversationId },
     data: { lastMessageAt: new Date() },
   });
-
-  await maybeSetTitle(conversationId, userMessage);
 
   return {
     conversationId,

@@ -175,6 +175,23 @@ export default function AssistantPage() {
     inputRef.current?.focus()
   }, [])
 
+  const deleteConversation = useCallback(
+    async (id: string) => {
+      try {
+        await api.delete(`/ai/conversations/${id}`)
+        setConversations((prev) => prev.filter((c) => c.id !== id))
+        // Clear the thread only if the one on screen is the one removed.
+        if (id === conversationId) {
+          setConversationId(null)
+          setMessages([])
+        }
+      } catch {
+        setError(t('ai.error'))
+      }
+    },
+    [conversationId, t]
+  )
+
   const send = useCallback(async () => {
     const text = input.trim()
     if (!text || sending) return
@@ -362,29 +379,59 @@ export default function AssistantPage() {
             {conversations.map((c) => {
               const active = c.id === conversationId
               return (
-                <button
+                <div
                   key={c.id}
-                  onClick={() => openConversation(c.id)}
                   style={{
-                    textAlign: isAr ? 'right' : 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
                     background: active ? '#eef4ff' : 'transparent',
                     border: active ? '1px solid #cfe0ff' : '1px solid transparent',
                     borderRadius: 9,
-                    padding: '9px 10px',
-                    cursor: 'pointer',
-                    fontSize: 12.5,
-                    fontWeight: active ? 700 : 500,
-                    color: active ? NAVY : '#4a5168',
-                    lineHeight: 1.45,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    direction: isAr ? 'rtl' : 'ltr',
                   }}
-                  title={c.title ?? ''}
                 >
-                  {c.title || t('ai.newChat')}
-                </button>
+                  <button
+                    onClick={() => openConversation(c.id)}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      textAlign: isAr ? 'right' : 'left',
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '9px 10px',
+                      cursor: 'pointer',
+                      fontSize: 12.5,
+                      fontWeight: active ? 700 : 500,
+                      color: active ? NAVY : '#4a5168',
+                      lineHeight: 1.45,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      direction: isAr ? 'rtl' : 'ltr',
+                    }}
+                    title={c.title ?? ''}
+                  >
+                    {c.title || t('ai.newChat')}
+                  </button>
+                  <button
+                    onClick={() => deleteConversation(c.id)}
+                    aria-label={t('ai.deleteChat')}
+                    title={t('ai.deleteChat')}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#b4bace',
+                      fontSize: 15,
+                      lineHeight: 1,
+                      padding: '7px 8px',
+                      borderRadius: 7,
+                      flexShrink: 0,
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
               )
             })}
           </aside>

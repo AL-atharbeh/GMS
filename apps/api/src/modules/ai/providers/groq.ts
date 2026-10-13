@@ -164,21 +164,37 @@ export class GroqProvider implements LlmProvider {
       body.tool_choice = 'auto';
     }
 
-    const res = await fetch(`${GROQ_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(120_000),
-    });
+    const send = () =>
+      fetch(`${GROQ_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(120_000),
+      });
+
+    let res = await send();
+
+    // Groq's free tier caps tokens per minute, and a tool-using turn can
+    // exhaust it in one question. Honour retry-after once rather than failing
+    // the whole turn on a limit that clears in seconds.
+    if (res.status === 429) {
+      const wait = Number(res.headers.get('retry-after') ?? '0');
+      const delayMs = Math.min(Math.max(wait, 1) * 1000, 20_000);
+      logger.warn('Groq rate limited; retrying once', { model, delayMs });
+      await new Promise((r) => setTimeout(r, delayMs));
+      res = await send();
+    }
 
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
-      throw new Error(
+      const err = new Error(
         `Groq request failed (${res.status}): ${detail.slice(0, 500)}`
       );
+      (err as Error & { status?: number }).status = res.status;
+      throw err;
     }
 
     const json = (await res.json()) as OpenAiResponse;

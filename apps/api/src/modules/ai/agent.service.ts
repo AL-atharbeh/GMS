@@ -61,11 +61,13 @@ function toolDefsFor(role: UserRole): AgentToolDef[] {
 async function loadHistory(conversationId: string): Promise<AgentMessage[]> {
   const rows = await prisma.aiMessage.findMany({
     where: { conversationId },
-    orderBy: { createdAt: 'asc' },
-    // Enough context to be useful without unbounded growth; providers that
-    // support compaction can raise this.
-    take: 40,
+    orderBy: { createdAt: 'desc' },
+    // Tool results carry full database payloads, so history is the biggest
+    // token consumer in a turn. Kept tight to stay inside per-minute token
+    // limits; providers with compaction or larger quotas can raise this.
+    take: 14,
   });
+  rows.reverse();
 
   return rows.map((r) => {
     const stored = r.content as {
@@ -282,11 +284,26 @@ export async function runAgentTurn(params: {
       // Surface provider failures with a code instead of an opaque 500 —
       // otherwise a bad model id or a rate limit is undebuggable in production.
       const reason = err instanceof Error ? err.message : String(err);
+      const status = (err as Error & { status?: number }).status;
       logger.error('AI provider call failed', {
         provider: provider.name,
         model: provider.agentModel,
+        status,
         reason,
       });
+
+      // A rate limit is a wait, not a fault — say so in the user's language
+      // instead of showing them the provider's error.
+      if (status === 429) {
+        throw new AppError(
+          ctx.language === 'ar'
+            ? 'المساعد مزدحم الآن. انتظر دقيقة وأعد المحاولة.'
+            : 'The assistant is busy right now. Wait a minute and try again.',
+          429,
+          'AI_RATE_LIMITED'
+        );
+      }
+
       throw new AppError(
         `AI provider (${provider.name}) failed: ${reason.slice(0, 300)}`,
         502,
